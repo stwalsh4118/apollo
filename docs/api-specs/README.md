@@ -8,6 +8,7 @@ and ensure consistency across the project.
 | System | Spec File | Description |
 |--------|-----------|-------------|
 | Database | [database-api.md](./database/database-api.md) | SQLite connection, migration system, full schema reference |
+| Curriculum | [curriculum-api.md](./curriculum/curriculum-api.md) | REST endpoints, repository interfaces, models, error handling |
 
 ## Organization
 
