@@ -64,4 +64,4 @@ N/A — backend API PBI. JSON response shapes should be frontend-friendly (neste
 
 ## Related Tasks
 
-_Tasks will be created when this PBI moves to Agreed via `/plan-pbi 2`._
+[View Tasks](./tasks.md)
