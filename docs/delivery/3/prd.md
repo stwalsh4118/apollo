@@ -68,4 +68,4 @@ The API serves curriculum data (PBI 2) but there's no way to see or interact wit
 
 ## Related Tasks
 
-_Tasks will be created when this PBI moves to Agreed via `/plan-pbi 3`._
+[View Tasks](./tasks.md)
