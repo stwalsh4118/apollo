@@ -79,9 +79,13 @@ func (r *SQLiteSearchRepository) Search(ctx context.Context, query string, param
 	}, nil
 }
 
+// classifySearchError maps SQLite FTS5 query errors to ErrInvalidQuery.
+// Error messages checked are SQLite implementation details (validated against SQLite 3.x).
 func classifySearchError(err error) error {
-	if strings.Contains(err.Error(), "fts5: syntax error") {
-		return fmt.Errorf("%w: %s", ErrInvalidQuery, err.Error())
+	msg := err.Error()
+	if strings.Contains(msg, "fts5: syntax error") ||
+		strings.Contains(msg, "unterminated string") {
+		return fmt.Errorf("%w: %s", ErrInvalidQuery, msg)
 	}
 
 	return fmt.Errorf("search: %w", err)

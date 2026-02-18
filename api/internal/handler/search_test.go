@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/sean/apollo/api/internal/handler"
 	"github.com/sean/apollo/api/internal/models"
+	"github.com/sean/apollo/api/internal/repository"
 )
 
 type mockSearchRepo struct {
@@ -88,5 +90,20 @@ func TestSearchHandlerError(t *testing.T) {
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500, got %d", rec.Code)
+	}
+}
+
+func TestSearchHandlerInvalidQuery(t *testing.T) {
+	r := chi.NewRouter()
+	handler.NewSearchHandler(&mockSearchRepo{
+		returnErr: fmt.Errorf("%w: simulated", repository.ErrInvalidQuery),
+	}).RegisterRoutes(r)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/search?q=bad\"query", nil)
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for invalid query, got %d", rec.Code)
 	}
 }

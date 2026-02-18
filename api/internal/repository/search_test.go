@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -108,6 +109,25 @@ func TestSearchNoResults(t *testing.T) {
 
 	if len(result.Items) != 0 {
 		t.Fatalf("expected 0 items, got %d", len(result.Items))
+	}
+}
+
+func TestSearchInvalidFTS5Syntax(t *testing.T) {
+	db := setupTestDB(t)
+	repo := repository.NewSearchRepository(db)
+
+	mustExec(t, db, "INSERT INTO search_index (entity_type, entity_id, title, body) VALUES (?, ?, ?, ?)",
+		"topic", "t1", "Go Basics", "Learn Go programming")
+
+	params := models.PaginationParams{Page: 1, PerPage: 20}
+
+	_, err := repo.Search(context.Background(), "\"unclosed", params)
+	if err == nil {
+		t.Fatal("expected error for invalid FTS5 syntax")
+	}
+
+	if !errors.Is(err, repository.ErrInvalidQuery) {
+		t.Fatalf("expected ErrInvalidQuery, got: %v", err)
 	}
 }
 
