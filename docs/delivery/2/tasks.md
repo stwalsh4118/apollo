@@ -8,15 +8,15 @@ This document lists all tasks associated with PBI 2.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 2-1 | [HTTP Server & Router Foundation](./2-1.md) | Proposed | Set up chi router with middleware, wire HTTP server into main.go, add health endpoint |
-| 2-2 | [Response Models & JSON Helpers](./2-2.md) | Proposed | Define Go structs for all API response types and JSON helper functions |
-| 2-3 | [Topic Repository & Handlers](./2-3.md) | Proposed | Repository + handlers for topic list, detail, and full tree endpoints |
-| 2-4 | [Module & Lesson Repository & Handlers](./2-4.md) | Proposed | Repository + handlers for module and lesson detail endpoints |
-| 2-5 | [Concept Repository & Handlers](./2-5.md) | Proposed | Repository + handlers for concept list, detail, and references endpoints |
-| 2-6 | [Curriculum Write Endpoints](./2-6.md) | Proposed | Internal write repository + handlers for research pipeline data ingestion |
-| 2-7 | [Search Endpoint](./2-7.md) | Proposed | FTS5 search repository + handler for full-text search |
-| 2-8 | [Knowledge Graph Endpoints](./2-8.md) | Proposed | Graph repository + handlers for topic/concept graph visualization data |
-| 2-9 | [E2E CoS Test](./2-9.md) | Proposed | End-to-end verification of all PBI 2 acceptance criteria |
+| 2-1 | [HTTP Server & Router Foundation](./2-1.md) | Review | Set up chi router with middleware, wire HTTP server into main.go, add health endpoint |
+| 2-2 | [Response Models & JSON Helpers](./2-2.md) | Review | Define Go structs for all API response types and JSON helper functions |
+| 2-3 | [Topic Repository & Handlers](./2-3.md) | Review | Repository + handlers for topic list, detail, and full tree endpoints |
+| 2-4 | [Module & Lesson Repository & Handlers](./2-4.md) | Review | Repository + handlers for module and lesson detail endpoints |
+| 2-5 | [Concept Repository & Handlers](./2-5.md) | Review | Repository + handlers for concept list, detail, and references endpoints |
+| 2-6 | [Curriculum Write Endpoints](./2-6.md) | Review | Internal write repository + handlers for research pipeline data ingestion |
+| 2-7 | [Search Endpoint](./2-7.md) | Review | FTS5 search repository + handler for full-text search |
+| 2-8 | [Knowledge Graph Endpoints](./2-8.md) | Review | Graph repository + handlers for topic/concept graph visualization data |
+| 2-9 | [E2E CoS Test](./2-9.md) | Review | End-to-end verification of all PBI 2 acceptance criteria |
 
 ## Dependency Graph
 

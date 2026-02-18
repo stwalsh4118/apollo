@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // ErrInvalidQuery indicates a malformed FTS5 search query.
-var ErrInvalidQuery = fmt.Errorf("invalid search query")
+var ErrInvalidQuery = errors.New("invalid search query")
 
 // SearchRepository defines search operations.
 type SearchRepository interface {
@@ -27,6 +28,7 @@ func NewSearchRepository(db *sql.DB) *SQLiteSearchRepository {
 	return &SQLiteSearchRepository{db: db}
 }
 
+// searchSQL: snippet column index 3 = body column in search_index(entity_type, entity_id, title, body).
 const searchSQL = `
 SELECT entity_type, entity_id, title,
        snippet(search_index, 3, '<mark>', '</mark>', '...', 30)
