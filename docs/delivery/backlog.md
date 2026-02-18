@@ -6,7 +6,7 @@
 
 | ID | Actor | User Story | Status | Conditions of Satisfaction (CoS) |
 |----|-------|-----------|--------|----------------------------------|
-| 1 | Developer | As a developer, I want a Go project scaffold with SQLite schema and migrations so that all data entities have a persistent, validated storage layer | Proposed | Go module initialised with dependencies; SQLite schema covers all PRD tables; migrations run idempotently; config loaded from env vars |
+| 1 | Developer | As a developer, I want a Go project scaffold with SQLite schema and migrations so that all data entities have a persistent, validated storage layer | Done | Go module initialised with dependencies; SQLite schema covers all PRD tables; migrations run idempotently; config loaded from env vars |
 | 2 | Developer | As a developer, I want REST API endpoints for all curriculum entities so that the frontend can browse topics, modules, lessons, and concepts | Proposed | CRUD endpoints for topics, modules, lessons, concepts; concept references and prerequisites queryable; JSON responses match PRD schema; search endpoint with FTS5 |
 | 3 | Learner | As a learner, I want to browse generated curricula in an interactive course UI so that I can read lessons and navigate between modules | Proposed | React app scaffolded with routing; course view renders module sidebar + lesson content; all 6 content section types rendered (text, code, callout, diagram, table, image); Shiki + Mermaid integrated |
 | 4 | Learner | As a learner, I want to track my progress through lessons and add personal notes so that I can study methodically and capture insights | Proposed | Progress API stores per-lesson status and notes; frontend shows progress bars per module; mark-complete button works; notes saved and persisted; concept chips link to definitions |
@@ -47,3 +47,5 @@ _Items are ordered by priority (highest first)._
 | Timestamp | PBI_ID | Event_Type | Details | User |
 |-----------|--------|------------|---------|------|
 | 20260218-090547 | ALL | Created | Initial backlog created from PRD decomposition | AI_Agent |
+| 2026-02-18 09:15:55 | 1 | Status Change | Proposed -> InProgress. Started implementation. | AI_Agent |
+| 2026-02-18 09:53:53 | 1 | Status Change | InProgress -> Done. All 3 tasks completed and verified. | AI_Agent |

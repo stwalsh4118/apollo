@@ -5,7 +5,9 @@ and ensure consistency across the project.
 
 ## Available Specs
 
-_No specs yet. Specs will be created as PBIs are implemented._
+| System | Spec File | Description |
+|--------|-----------|-------------|
+| Database | [database-api.md](./database/database-api.md) | SQLite connection, migration system, full schema reference |
 
 ## Organization
 
