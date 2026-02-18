@@ -2,15 +2,24 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/sean/apollo/api/internal/config"
 	"github.com/sean/apollo/api/internal/database"
 	"github.com/sean/apollo/api/internal/logging"
+	"github.com/sean/apollo/api/internal/server"
 )
 
-const exitCodeFailure = 1
+const (
+	exitCodeFailure     = 1
+	shutdownGracePeriod = 10 * time.Second
+)
 
 func main() {
 	if err := run(); err != nil {
@@ -20,7 +29,8 @@ func main() {
 }
 
 func run() error {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -40,17 +50,44 @@ func run() error {
 		_ = handle.Close()
 	}()
 
-	logger.Info().
-		Str("database_path", cfg.DatabasePath).
-		Int("server_port", cfg.ServerPort).
-		Int("max_research_depth", cfg.MaxResearchDepth).
-		Int("max_parallel_agents", cfg.MaxParallelAgents).
-		Int("topic_size_limit", cfg.TopicSizeLimit).
-		Str("auto_expand_priority", cfg.AutoExpandPriority).
-		Int("curriculum_stale_days", cfg.CurriculumStale).
-		Int("mastery_threshold_days", cfg.MasteryThreshold).
-		Str("research_work_dir", cfg.ResearchWorkDir).
-		Msg("apollo foundation initialized with database migrations")
+	srv := server.New(handle, logger)
+
+	httpServer := &http.Server{
+		Addr:              fmt.Sprintf(":%d", cfg.ServerPort),
+		Handler:           srv.Router(),
+		ReadHeaderTimeout: shutdownGracePeriod,
+		IdleTimeout:       2 * time.Minute,
+	}
+
+	errCh := make(chan error, 1)
+
+	go func() {
+		logger.Info().
+			Int("port", cfg.ServerPort).
+			Msg("apollo HTTP server starting")
+
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- fmt.Errorf("http server: %w", err)
+		}
+
+		close(errCh)
+	}()
+
+	select {
+	case err := <-errCh:
+		return err
+	case <-ctx.Done():
+		logger.Info().Msg("shutdown signal received")
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownGracePeriod)
+	defer cancel()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("http server shutdown: %w", err)
+	}
+
+	logger.Info().Msg("apollo HTTP server stopped gracefully")
 
 	return nil
 }

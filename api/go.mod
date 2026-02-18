@@ -1,8 +1,9 @@
 module github.com/sean/apollo/api
 
-go 1.24.0
+go 1.25.5
 
 require (
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/rs/zerolog v1.34.0
 	modernc.org/sqlite v1.46.1
 )
