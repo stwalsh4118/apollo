@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apollo.local/schemas/knowledge_pool_summary.json",
+  "title": "Knowledge Pool Summary",
+  "description": "Context file written by the orchestrator before spawning research sessions. Tells the research agent what already exists in the knowledge pool.",
+  "type": "object",
+  "required": ["existing_topics", "existing_concepts"],
+  "additionalProperties": false,
+  "properties": {
+    "existing_topics": {
+      "type": "array",
+      "description": "Topics already in the knowledge pool with their module slugs.",
+      "items": {
+        "type": "object",
+        "required": ["id", "modules"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Topic slug, e.g. 'linux-administration'."
+          },
+          "modules": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Module slugs within this topic."
+          }
+        }
+      }
+    },
+    "existing_concepts": {
+      "type": "array",
+      "description": "Concept slugs already defined in the knowledge pool.",
+      "items": { "type": "string" }
+    }
+  }
+}
