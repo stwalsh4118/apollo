@@ -47,12 +47,16 @@ App (RouterProvider)
 ### Client Functions
 
 ```typescript
-function fetchJson<T>(url: string): Promise<T>
+function fetchJson<T>(url: string, init?: RequestInit): Promise<T>
+function mutateJson<T>(url: string, method: string, body: unknown): Promise<T>
 function fetchTopics(): Promise<PaginatedResponse<TopicSummary>>
 function fetchTopicDetail(id: string): Promise<TopicDetail>
 function fetchTopicFull(id: string): Promise<TopicFull>
 function fetchModuleDetail(id: string): Promise<ModuleDetail>
 function fetchLessonDetail(id: string): Promise<LessonDetail>
+function fetchTopicProgress(topicId: string): Promise<TopicProgress>
+function fetchProgressSummary(): Promise<ProgressSummary>
+function updateLessonProgress(lessonId: string, input: UpdateProgressInput): Promise<LessonProgress>
 ```
 
 ## TanStack Query Hooks
@@ -63,6 +67,7 @@ function fetchLessonDetail(id: string): Promise<LessonDetail>
 const topicKeys = { all: ["topics"], detail: (id) => ["topics", id], full: (id) => ["topics", id, "full"] }
 const moduleKeys = { all: ["modules"], detail: (id) => ["modules", id] }
 const lessonKeys = { all: ["lessons"], detail: (id) => ["lessons", id] }
+const progressKeys = { all: ["progress"], topic: (id) => ["progress", "topic", id], summary: ["progress", "summary"] }
 ```
 
 ### Hooks
@@ -73,6 +78,9 @@ function useTopicDetail(id: string): UseQueryResult<TopicDetail>
 function useTopicFull(id: string): UseQueryResult<TopicFull>
 function useModuleDetail(id: string): UseQueryResult<ModuleDetail>
 function useLessonDetail(id: string): UseQueryResult<LessonDetail>
+function useTopicProgress(topicId: string): UseQueryResult<TopicProgress>
+function useProgressSummary(): UseQueryResult<ProgressSummary>
+function useUpdateLessonProgress(topicId: string): UseMutationResult  // invalidates progress.topic + progress.summary
 ```
 
 ### Query Client Config
