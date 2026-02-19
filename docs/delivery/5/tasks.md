@@ -8,11 +8,11 @@ This document lists all tasks associated with PBI 5.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 5-1 | [Curriculum JSON Schema](./5-1.md) | Proposed | Create JSON Schema for the curriculum structure matching PRD section 7 |
-| 5-2 | [Knowledge Pool Summary Schema](./5-2.md) | Proposed | Create JSON Schema for the knowledge_pool_summary.json context file |
-| 5-3 | [Research Skill Prompt](./5-3.md) | Proposed | Create the 4-pass research pipeline skill prompt file |
-| 5-4 | [Go Schema Validation Package](./5-4.md) | Proposed | Create Go package to load and validate curriculum JSON against the schema |
-| 5-5 | [E2E CoS Test](./5-5.md) | Proposed | End-to-end validation of all PBI 5 acceptance criteria |
+| 5-1 | [Curriculum JSON Schema](./5-1.md) | Done | Create JSON Schema for the curriculum structure matching PRD section 7 |
+| 5-2 | [Knowledge Pool Summary Schema](./5-2.md) | Done | Create JSON Schema for the knowledge_pool_summary.json context file |
+| 5-3 | [Research Skill Prompt](./5-3.md) | Done | Create the 4-pass research pipeline skill prompt file |
+| 5-4 | [Go Schema Validation Package](./5-4.md) | Done | Create Go package to load and validate curriculum JSON against the schema |
+| 5-5 | [E2E CoS Test](./5-5.md) | Done | End-to-end validation of all PBI 5 acceptance criteria |
 
 ## Dependency Graph
 
