@@ -60,4 +60,4 @@ The course view (PBI 3) renders content but doesn't track whether the user has s
 
 ## Related Tasks
 
-_Tasks will be created when this PBI moves to Agreed via `/plan-pbi 4`._
+[View Tasks](./tasks.md)
