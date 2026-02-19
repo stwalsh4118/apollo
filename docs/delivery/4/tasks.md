@@ -8,15 +8,15 @@ This document lists all tasks associated with PBI 4.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 4-1 | [Progress models and types](./4-1.md) | Proposed | Define Go models and TypeScript types for learning progress API |
-| 4-2 | [Progress repository](./4-2.md) | Proposed | Implement data access layer for learning_progress table |
-| 4-3 | [Progress API handlers](./4-3.md) | Proposed | Create HTTP handlers and register routes for progress endpoints |
-| 4-4 | [Frontend progress API client and hooks](./4-4.md) | Proposed | Add progress client functions, mutations, and TanStack Query hooks |
-| 4-5 | [Mark Complete button and completion indicators](./4-5.md) | Proposed | Add Mark Complete button to lesson view and checkmarks in sidebar |
-| 4-6 | [Module progress bars](./4-6.md) | Proposed | Add progress bars per module in the sidebar |
-| 4-7 | [Personal notes textarea](./4-7.md) | Proposed | Add inline notes textarea per lesson with save functionality |
-| 4-8 | [Concept chips on lessons](./4-8.md) | Proposed | Render concept badges at top of lesson linking to concept detail |
-| 4-9 | [E2E CoS Test](./4-9.md) | Proposed | End-to-end tests verifying all PBI 4 acceptance criteria |
+| 4-1 | [Progress models and types](./4-1.md) | Done | Define Go models and TypeScript types for learning progress API |
+| 4-2 | [Progress repository](./4-2.md) | Done | Implement data access layer for learning_progress table |
+| 4-3 | [Progress API handlers](./4-3.md) | Done | Create HTTP handlers and register routes for progress endpoints |
+| 4-4 | [Frontend progress API client and hooks](./4-4.md) | Done | Add progress client functions, mutations, and TanStack Query hooks |
+| 4-5 | [Mark Complete button and completion indicators](./4-5.md) | Done | Add Mark Complete button to lesson view and checkmarks in sidebar |
+| 4-6 | [Module progress bars](./4-6.md) | Done | Add progress bars per module in the sidebar |
+| 4-7 | [Personal notes textarea](./4-7.md) | Done | Add inline notes textarea per lesson with save functionality |
+| 4-8 | [Concept chips on lessons](./4-8.md) | Done | Render concept badges at top of lesson linking to concept detail |
+| 4-9 | [E2E CoS Test](./4-9.md) | Done | End-to-end tests verifying all PBI 4 acceptance criteria |
 
 ## Dependency Graph
 
