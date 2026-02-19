@@ -8,17 +8,17 @@ This document lists all tasks associated with PBI 3.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 3-1 | [React + Vite + Tailwind scaffold with API proxy](./3-1.md) | Proposed | Scaffold React/TypeScript/Vite project, configure Tailwind CSS, set up dev server API proxy to Go backend |
-| 3-2 | [TypeScript types & TanStack Query API client](./3-2.md) | Proposed | Define TypeScript interfaces matching Go API models; create TanStack Query hooks for all curriculum endpoints |
-| 3-3 | [App routing & layout shell](./3-3.md) | Proposed | Configure React Router v7 routes and build responsive app layout with sidebar/main content areas |
-| 3-4 | [Topic list page](./3-4.md) | Proposed | Build the `/` route with topic cards showing title, difficulty, description, and module count |
-| 3-5 | [Course view layout & module sidebar](./3-5.md) | Proposed | Build the `/topics/:id` course view with collapsible module sidebar and lesson content area |
-| 3-6 | [Content section renderers — text, table, callout, image](./3-6.md) | Proposed | Implement four content section renderers: text (react-markdown), table, callout (4 variants), and image |
-| 3-7 | [Code section renderer with Shiki](./3-7.md) | Proposed | Implement code section renderer with Shiki syntax highlighting, copy button, and language label |
-| 3-8 | [Diagram renderer with Mermaid.js](./3-8.md) | Proposed | Implement diagram section renderer with Mermaid.js rendering and error fallback |
-| 3-9 | [Exercise & review question rendering](./3-9.md) | Proposed | Render exercises with progressive hint reveal and review questions in collapsible sections |
-| 3-10 | [Lesson navigation](./3-10.md) | Proposed | Implement prev/next lesson navigation within and across modules |
-| 3-11 | [E2E CoS test](./3-11.md) | Proposed | End-to-end verification of all PBI 3 acceptance criteria |
+| 3-1 | [React + Vite + Tailwind scaffold with API proxy](./3-1.md) | Done | Scaffold React/TypeScript/Vite project, configure Tailwind CSS, set up dev server API proxy to Go backend |
+| 3-2 | [TypeScript types & TanStack Query API client](./3-2.md) | Done | Define TypeScript interfaces matching Go API models; create TanStack Query hooks for all curriculum endpoints |
+| 3-3 | [App routing & layout shell](./3-3.md) | Done | Configure React Router v7 routes and build responsive app layout with sidebar/main content areas |
+| 3-4 | [Topic list page](./3-4.md) | Done | Build the `/` route with topic cards showing title, difficulty, description, and module count |
+| 3-5 | [Course view layout & module sidebar](./3-5.md) | Done | Build the `/topics/:id` course view with collapsible module sidebar and lesson content area |
+| 3-6 | [Content section renderers — text, table, callout, image](./3-6.md) | Done | Implement four content section renderers: text (react-markdown), table, callout (4 variants), and image |
+| 3-7 | [Code section renderer with Shiki](./3-7.md) | Done | Implement code section renderer with Shiki syntax highlighting, copy button, and language label |
+| 3-8 | [Diagram renderer with Mermaid.js](./3-8.md) | Done | Implement diagram section renderer with Mermaid.js rendering and error fallback |
+| 3-9 | [Exercise & review question rendering](./3-9.md) | Done | Render exercises with progressive hint reveal and review questions in collapsible sections |
+| 3-10 | [Lesson navigation](./3-10.md) | Done | Implement prev/next lesson navigation within and across modules |
+| 3-11 | [E2E CoS test](./3-11.md) | Done | End-to-end verification of all PBI 3 acceptance criteria |
 
 ## Dependency Graph
 
