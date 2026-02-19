@@ -1,0 +1,13 @@
+{
+  "existing_topics": [
+    {
+      "id": "linux-administration",
+      "modules": ["filesystem", "users-permissions", "systemd", "package-management"]
+    },
+    {
+      "id": "networking-fundamentals",
+      "modules": ["osi-model", "tcp-ip", "dns", "vlans-and-trunking"]
+    }
+  ],
+  "existing_concepts": ["linux-bridge", "vlan-tagging", "systemd-unit-files", "iptables"]
+}
