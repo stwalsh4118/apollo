@@ -68,4 +68,4 @@ N/A — backend PBI. The research progress UI comes in PBI 7.
 
 ## Related Tasks
 
-_Tasks will be created when this PBI moves to Agreed via `/plan-pbi 6`._
+[View Tasks](./tasks.md)
