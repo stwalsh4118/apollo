@@ -1,4 +1,4 @@
-import type { ModuleFull } from "../api";
+import type { ModuleFull, ProgressStatus } from "../api";
 import ModuleItem from "./ModuleItem";
 
 interface ModuleSidebarProps {
@@ -6,6 +6,7 @@ interface ModuleSidebarProps {
   activeLessonId: string;
   onSelectLesson: (lessonId: string) => void;
   onClose?: () => void;
+  progressMap?: Map<string, ProgressStatus>;
 }
 
 export default function ModuleSidebar({
@@ -13,6 +14,7 @@ export default function ModuleSidebar({
   activeLessonId,
   onSelectLesson,
   onClose,
+  progressMap,
 }: ModuleSidebarProps) {
   return (
     <nav className="flex h-full flex-col">
@@ -49,6 +51,7 @@ export default function ModuleSidebar({
               activeLessonId={activeLessonId}
               onSelectLesson={onSelectLesson}
               defaultExpanded={index === 0}
+              progressMap={progressMap}
             />
           ))}
         </div>

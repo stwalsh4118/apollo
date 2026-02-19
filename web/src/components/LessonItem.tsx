@@ -1,15 +1,47 @@
-import type { LessonSummary } from "../api";
+import type { LessonSummary, ProgressStatus } from "../api";
 
 interface LessonItemProps {
   lesson: LessonSummary;
   isActive: boolean;
   onSelect: (lessonId: string) => void;
+  status?: ProgressStatus;
+}
+
+function StatusIndicator({ status }: { status?: ProgressStatus }) {
+  if (status === "completed") {
+    return (
+      <svg
+        className="size-4 shrink-0 text-green-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M5 13l4 4L19 7"
+        />
+      </svg>
+    );
+  }
+
+  if (status === "in_progress") {
+    return (
+      <span className="size-2 shrink-0 rounded-full bg-blue-400" />
+    );
+  }
+
+  return (
+    <span className="size-2 shrink-0 rounded-full border border-gray-300" />
+  );
 }
 
 export default function LessonItem({
   lesson,
   isActive,
   onSelect,
+  status,
 }: LessonItemProps) {
   return (
     <button
@@ -20,7 +52,7 @@ export default function LessonItem({
           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
       }`}
     >
-      <span className="size-1.5 shrink-0 rounded-full bg-current opacity-40" />
+      <StatusIndicator status={status} />
       <span className="truncate">{lesson.title}</span>
     </button>
   );

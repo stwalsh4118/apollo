@@ -4,6 +4,10 @@ import type {
   TopicFull,
   ModuleDetail,
   LessonDetail,
+  TopicProgress,
+  ProgressSummary,
+  LessonProgress,
+  UpdateProgressInput,
 } from "./types";
 
 export class ApiError extends Error {
@@ -16,12 +20,24 @@ export class ApiError extends Error {
   }
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init);
   if (!res.ok) {
     throw new ApiError(res.status, `HTTP ${res.status}: ${url}`);
   }
   return res.json();
+}
+
+async function mutateJson<T>(
+  url: string,
+  method: string,
+  body: unknown,
+): Promise<T> {
+  return fetchJson(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 export function fetchTopics(): Promise<TopicSummary[]> {
@@ -42,4 +58,23 @@ export function fetchModuleDetail(id: string): Promise<ModuleDetail> {
 
 export function fetchLessonDetail(id: string): Promise<LessonDetail> {
   return fetchJson(`/api/lessons/${encodeURIComponent(id)}`);
+}
+
+export function fetchTopicProgress(topicId: string): Promise<TopicProgress> {
+  return fetchJson(`/api/progress/topics/${encodeURIComponent(topicId)}`);
+}
+
+export function fetchProgressSummary(): Promise<ProgressSummary> {
+  return fetchJson("/api/progress/summary");
+}
+
+export function updateLessonProgress(
+  lessonId: string,
+  input: UpdateProgressInput,
+): Promise<LessonProgress> {
+  return mutateJson(
+    `/api/progress/lessons/${encodeURIComponent(lessonId)}`,
+    "PUT",
+    input,
+  );
 }

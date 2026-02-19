@@ -58,6 +58,9 @@ func (s *Server) Router() chi.Router {
 	graphHandler := handler.NewGraphHandler(repository.NewGraphRepository(s.db.DB))
 	graphHandler.RegisterRoutes(r)
 
+	progressHandler := handler.NewProgressHandler(repository.NewProgressRepository(s.db.DB))
+	progressHandler.RegisterRoutes(r)
+
 	return r
 }
 

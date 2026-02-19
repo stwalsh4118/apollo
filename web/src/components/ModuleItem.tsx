@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { ModuleFull } from "../api";
+import type { ModuleFull, ProgressStatus } from "../api";
 import LessonItem from "./LessonItem";
 
 interface ModuleItemProps {
@@ -7,6 +7,7 @@ interface ModuleItemProps {
   activeLessonId: string;
   onSelectLesson: (lessonId: string) => void;
   defaultExpanded?: boolean;
+  progressMap?: Map<string, ProgressStatus>;
 }
 
 export default function ModuleItem({
@@ -14,10 +15,18 @@ export default function ModuleItem({
   activeLessonId,
   onSelectLesson,
   defaultExpanded = false,
+  progressMap,
 }: ModuleItemProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const hasActiveLesson = module.lessons.some((l) => l.id === activeLessonId);
+
+  const totalLessons = module.lessons.length;
+  const completedLessons = progressMap
+    ? module.lessons.filter((l) => progressMap.get(l.id) === "completed").length
+    : 0;
+  const progressPct =
+    totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
   return (
     <div>
@@ -41,6 +50,22 @@ export default function ModuleItem({
         </svg>
       </button>
 
+      {totalLessons > 0 && (
+        <div className="mx-3 mb-1">
+          <div className="flex items-center gap-2">
+            <div className="h-1 flex-1 overflow-hidden rounded-full bg-gray-200">
+              <div
+                className="h-full rounded-full bg-green-500 transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <span className="shrink-0 text-xs text-gray-400">
+              {completedLessons}/{totalLessons}
+            </span>
+          </div>
+        </div>
+      )}
+
       {(expanded || hasActiveLesson) && (
         <div className="ml-2 space-y-0.5 pb-2">
           {module.lessons.map((lesson) => (
@@ -49,6 +74,7 @@ export default function ModuleItem({
               lesson={lesson}
               isActive={lesson.id === activeLessonId}
               onSelect={onSelectLesson}
+              status={progressMap?.get(lesson.id)}
             />
           ))}
         </div>
