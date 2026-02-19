@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { useTopicFull } from "../api";
-import type { ModuleFull } from "../api";
+import { useTopicFull, useTopicProgress } from "../api";
+import type { ConceptSummary, ModuleFull, ProgressStatus } from "../api";
 import ModuleSidebar from "../components/ModuleSidebar";
 import LessonContent from "../components/LessonContent";
 import LessonNavigation from "../components/LessonNavigation";
@@ -34,9 +34,47 @@ function lessonReducer(
 
 export default function CourseViewPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: topic, isLoading, isError, error } = useTopicFull(id ?? "");
+  const topicId = id ?? "";
+  const { data: topic, isLoading, isError, error } = useTopicFull(topicId);
+  const { data: topicProgress } = useTopicProgress(topicId);
   const [activeLessonId, dispatch] = useReducer(lessonReducer, null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const progressMap = useMemo(() => {
+    const map = new Map<string, ProgressStatus>();
+    if (topicProgress) {
+      for (const lp of topicProgress.lessons) {
+        map.set(lp.lesson_id, lp.status);
+      }
+    }
+    return map;
+  }, [topicProgress]);
+
+  const notesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (topicProgress) {
+      for (const lp of topicProgress.lessons) {
+        if (lp.notes) {
+          map.set(lp.lesson_id, lp.notes);
+        }
+      }
+    }
+    return map;
+  }, [topicProgress]);
+
+  const conceptsMap = useMemo(() => {
+    const map = new Map<string, ConceptSummary[]>();
+    if (topic) {
+      for (const mod of topic.modules) {
+        for (const lesson of mod.lessons) {
+          if (lesson.concepts && lesson.concepts.length > 0) {
+            map.set(lesson.id, lesson.concepts);
+          }
+        }
+      }
+    }
+    return map;
+  }, [topic]);
 
   const sortedModules = useMemo(() => {
     if (!topic) return [];
@@ -141,6 +179,7 @@ export default function CourseViewPage() {
           activeLessonId={activeLessonId ?? ""}
           onSelectLesson={handleSelectLesson}
           onClose={() => setSidebarOpen(false)}
+          progressMap={progressMap}
         />
       </aside>
 
@@ -149,7 +188,14 @@ export default function CourseViewPage() {
         <div className="mx-auto max-w-4xl px-6 py-8 lg:px-12">
           {activeLessonId ? (
             <>
-              <LessonContent lessonId={activeLessonId} />
+              <LessonContent
+                key={activeLessonId}
+                lessonId={activeLessonId}
+                topicId={topicId}
+                lessonStatus={progressMap.get(activeLessonId)}
+                lessonNotes={notesMap.get(activeLessonId)}
+                concepts={conceptsMap.get(activeLessonId)}
+              />
               <LessonNavigation
                 prev={lessonNav.prev}
                 next={lessonNav.next}
