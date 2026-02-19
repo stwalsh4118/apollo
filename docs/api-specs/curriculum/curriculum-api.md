@@ -63,6 +63,14 @@
 |--------|------|---------|-------------|
 | GET | `/api/health` | `Server.handleHealth` | Database health check |
 
+### Learning Progress
+
+| Method | Path | Handler | Description |
+|--------|------|---------|-------------|
+| GET | `/api/progress/topics/{id}` | `ProgressHandler.getTopicProgress` | Per-lesson progress for a topic (200) |
+| PUT | `/api/progress/lessons/{id}` | `ProgressHandler.updateLessonProgress` | Update lesson status and notes (200) |
+| GET | `/api/progress/summary` | `ProgressHandler.getProgressSummary` | Completion percentage and active topics (200) |
+
 ### Relations & Prerequisites
 
 | Method | Path | Handler | Description |
@@ -123,6 +131,13 @@ type WriteRepository interface {
 // SearchRepository — api/internal/repository/search.go
 type SearchRepository interface {
     Search(ctx context.Context, query string, params models.PaginationParams) (*models.PaginatedResponse[models.SearchResult], error)
+}
+
+// ProgressRepository — api/internal/repository/progress.go
+type ProgressRepository interface {
+    GetTopicProgress(ctx context.Context, topicID string) (*models.TopicProgress, error)
+    UpdateLessonProgress(ctx context.Context, lessonID string, input models.UpdateProgressInput) (*models.LessonProgress, error)
+    GetProgressSummary(ctx context.Context) (*models.ProgressSummary, error)
 }
 
 // GraphRepository — api/internal/repository/graph.go
@@ -186,6 +201,12 @@ type ConceptReference struct { LessonID, LessonTitle, Context string }
 
 // Search — api/internal/models/search.go
 type SearchResult struct { EntityType, EntityID, Title, Snippet string }
+
+// Progress — api/internal/models/progress.go
+type LessonProgress struct { LessonID, LessonTitle, Status, StartedAt, CompletedAt, Notes string }
+type TopicProgress struct { TopicID string; Lessons []LessonProgress }
+type ProgressSummary struct { TotalLessons, CompletedLessons int; CompletionPercentage float64; ActiveTopics int }
+type UpdateProgressInput struct { Status, Notes string }
 
 // Graph — api/internal/models/graph.go
 type GraphNode struct { ID, Label, Type string }
