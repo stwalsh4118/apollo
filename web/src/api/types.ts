@@ -223,6 +223,36 @@ export interface ConceptReference {
   context?: string;
 }
 
+// --- Learning Progress ---
+
+export type ProgressStatus = "not_started" | "in_progress" | "completed";
+
+export interface LessonProgress {
+  lesson_id: string;
+  lesson_title?: string;
+  status: ProgressStatus;
+  started_at?: string;
+  completed_at?: string;
+  notes?: string;
+}
+
+export interface TopicProgress {
+  topic_id: string;
+  lessons: LessonProgress[];
+}
+
+export interface ProgressSummary {
+  total_lessons: number;
+  completed_lessons: number;
+  completion_percentage: number;
+  active_topics: number;
+}
+
+export interface UpdateProgressInput {
+  status: ProgressStatus;
+  notes?: string;
+}
+
 // --- Search ---
 
 export interface SearchResult {
