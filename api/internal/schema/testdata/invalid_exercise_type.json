@@ -1,0 +1,35 @@
+{
+  "id": "bad-exercise",
+  "title": "Bad Exercise Type",
+  "description": "An exercise has an invalid type value.",
+  "difficulty": "foundational",
+  "estimated_hours": 1,
+  "tags": [],
+  "prerequisites": { "essential": [], "helpful": [], "deep_background": [] },
+  "related_topics": [],
+  "modules": [
+    {
+      "id": "m", "title": "M", "description": "D",
+      "learning_objectives": ["L"], "estimated_minutes": 10, "order": 1,
+      "lessons": [{
+        "id": "l", "title": "L", "order": 1, "estimated_minutes": 5,
+        "content": { "sections": [{ "type": "text", "body": "B" }] },
+        "concepts_taught": [], "concepts_referenced": [],
+        "examples": [],
+        "exercises": [{
+          "type": "hands_on",
+          "title": "Invalid Exercise",
+          "instructions": "Do something.",
+          "success_criteria": ["It works"],
+          "hints": [],
+          "environment": "any"
+        }],
+        "review_questions": []
+      }],
+      "assessment": { "questions": [{ "type": "conceptual", "question": "Q", "answer": "A", "concepts_tested": [] }] }
+    }
+  ],
+  "source_urls": [],
+  "generated_at": "2026-02-19T00:00:00Z",
+  "version": 1
+}

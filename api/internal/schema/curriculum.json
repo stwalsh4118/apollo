@@ -1,0 +1,474 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://apollo.local/schemas/curriculum.json",
+  "title": "Apollo Curriculum",
+  "description": "Complete Topic structure produced by the research pipeline.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "description",
+    "difficulty",
+    "estimated_hours",
+    "tags",
+    "prerequisites",
+    "related_topics",
+    "modules",
+    "source_urls",
+    "generated_at",
+    "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "URL-safe slug, e.g. 'proxmox-ve'."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable topic title."
+    },
+    "description": {
+      "type": "string",
+      "description": "1-2 paragraph overview of the topic."
+    },
+    "difficulty": {
+      "$ref": "#/$defs/Difficulty"
+    },
+    "estimated_hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total estimated learning time in hours."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Taxonomy tags for the topic."
+    },
+    "prerequisites": {
+      "$ref": "#/$defs/Prerequisites"
+    },
+    "related_topics": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Slugs of related topics."
+    },
+    "modules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Module" },
+      "minItems": 1,
+      "description": "Ordered list of modules in this topic."
+    },
+    "source_urls": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "description": "URLs used during research."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of generation."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Curriculum version number."
+    }
+  },
+  "$defs": {
+    "Difficulty": {
+      "type": "string",
+      "enum": ["foundational", "intermediate", "advanced"],
+      "description": "Difficulty level."
+    },
+    "Prerequisites": {
+      "type": "object",
+      "required": ["essential", "helpful", "deep_background"],
+      "additionalProperties": false,
+      "properties": {
+        "essential": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PrerequisiteItem" },
+          "description": "Must-know prerequisites; auto-researched."
+        },
+        "helpful": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PrerequisiteItem" },
+          "description": "Nice-to-know; user opt-in."
+        },
+        "deep_background": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PrerequisiteItem" },
+          "description": "Academic/theoretical background."
+        }
+      }
+    },
+    "PrerequisiteItem": {
+      "type": "object",
+      "required": ["topic_id", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "topic_id": {
+          "type": "string",
+          "description": "Slug of the prerequisite topic."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this prerequisite matters."
+        }
+      }
+    },
+    "Module": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "description",
+        "learning_objectives",
+        "estimated_minutes",
+        "order",
+        "lessons",
+        "assessment"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Module slug, e.g. 'proxmox-ve/networking'."
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "learning_objectives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "estimated_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "lessons": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Lesson" },
+          "minItems": 1
+        },
+        "assessment": {
+          "$ref": "#/$defs/Assessment"
+        }
+      }
+    },
+    "Assessment": {
+      "type": "object",
+      "required": ["questions"],
+      "additionalProperties": false,
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AssessmentQuestion" },
+          "minItems": 1
+        }
+      }
+    },
+    "AssessmentQuestion": {
+      "type": "object",
+      "required": ["type", "question", "answer", "concepts_tested"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["conceptual", "practical"]
+        },
+        "question": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "concepts_tested": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "Lesson": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "order",
+        "estimated_minutes",
+        "content",
+        "concepts_taught",
+        "concepts_referenced",
+        "examples",
+        "exercises",
+        "review_questions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Lesson slug, e.g. 'proxmox-ve/networking/vlan-configuration'."
+        },
+        "title": {
+          "type": "string"
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "estimated_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "content": {
+          "$ref": "#/$defs/LessonContent"
+        },
+        "concepts_taught": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ConceptTaught" }
+        },
+        "concepts_referenced": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ConceptReferenced" }
+        },
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Example" }
+        },
+        "exercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Exercise" }
+        },
+        "review_questions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ReviewQuestion" }
+        }
+      }
+    },
+    "LessonContent": {
+      "type": "object",
+      "required": ["sections"],
+      "additionalProperties": false,
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ContentSection" },
+          "minItems": 1
+        }
+      }
+    },
+    "ContentSection": {
+      "oneOf": [
+        { "$ref": "#/$defs/TextSection" },
+        { "$ref": "#/$defs/CodeSection" },
+        { "$ref": "#/$defs/CalloutSection" },
+        { "$ref": "#/$defs/DiagramSection" },
+        { "$ref": "#/$defs/TableSection" },
+        { "$ref": "#/$defs/ImageSection" }
+      ]
+    },
+    "TextSection": {
+      "type": "object",
+      "required": ["type", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "text" },
+        "body": { "type": "string" }
+      }
+    },
+    "CodeSection": {
+      "type": "object",
+      "required": ["type", "language", "code", "explanation"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "code" },
+        "language": { "type": "string" },
+        "code": { "type": "string" },
+        "explanation": { "type": "string" },
+        "title": { "type": "string" }
+      }
+    },
+    "CalloutSection": {
+      "type": "object",
+      "required": ["type", "variant", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "callout" },
+        "variant": {
+          "type": "string",
+          "enum": ["prerequisite", "warning", "tip", "info"]
+        },
+        "body": { "type": "string" },
+        "concept_ref": { "type": "string" }
+      }
+    },
+    "DiagramSection": {
+      "type": "object",
+      "required": ["type", "format", "source", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "diagram" },
+        "format": {
+          "type": "string",
+          "enum": ["mermaid", "image"]
+        },
+        "source": { "type": "string" },
+        "title": { "type": "string" }
+      }
+    },
+    "TableSection": {
+      "type": "object",
+      "required": ["type", "headers", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "table" },
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "ImageSection": {
+      "type": "object",
+      "required": ["type", "url", "alt", "caption"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "const": "image" },
+        "url": { "type": "string" },
+        "alt": { "type": "string" },
+        "caption": { "type": "string" }
+      }
+    },
+    "ConceptTaught": {
+      "type": "object",
+      "required": ["id", "name", "definition", "flashcard"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Globally unique concept slug."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable concept name."
+        },
+        "definition": {
+          "type": "string",
+          "description": "1-3 sentence explanation."
+        },
+        "flashcard": {
+          "$ref": "#/$defs/Flashcard"
+        }
+      }
+    },
+    "Flashcard": {
+      "type": "object",
+      "required": ["front", "back"],
+      "additionalProperties": false,
+      "properties": {
+        "front": {
+          "type": "string",
+          "description": "Spaced repetition question."
+        },
+        "back": {
+          "type": "string",
+          "description": "Spaced repetition answer."
+        }
+      }
+    },
+    "ConceptReferenced": {
+      "type": "object",
+      "required": ["id", "defined_in"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Slug of the referenced concept."
+        },
+        "defined_in": {
+          "type": "string",
+          "description": "Lesson slug where this concept is canonically defined."
+        }
+      }
+    },
+    "Example": {
+      "type": "object",
+      "required": ["title", "description", "code", "explanation"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "code": { "type": "string" },
+        "explanation": { "type": "string" }
+      }
+    },
+    "Exercise": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "instructions",
+        "success_criteria",
+        "hints",
+        "environment"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "command",
+            "configuration",
+            "exploration",
+            "build",
+            "troubleshooting",
+            "scenario",
+            "thought_experiment"
+          ]
+        },
+        "title": { "type": "string" },
+        "instructions": { "type": "string" },
+        "success_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "hints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "environment": { "type": "string" }
+      }
+    },
+    "ReviewQuestion": {
+      "type": "object",
+      "required": ["question", "answer", "concepts_tested"],
+      "additionalProperties": false,
+      "properties": {
+        "question": { "type": "string" },
+        "answer": { "type": "string" },
+        "concepts_tested": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

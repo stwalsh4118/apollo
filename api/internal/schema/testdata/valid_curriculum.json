@@ -1,0 +1,398 @@
+{
+  "id": "proxmox-ve",
+  "title": "Proxmox Virtual Environment",
+  "description": "Complete guide to Proxmox VE — installation, virtual machines, containers, storage, networking, and operations.",
+  "difficulty": "intermediate",
+  "estimated_hours": 20,
+  "tags": ["infrastructure", "virtualization", "homelab", "linux"],
+  "prerequisites": {
+    "essential": [
+      {
+        "topic_id": "linux-administration",
+        "reason": "Proxmox runs on Debian Linux. You need to be comfortable with the command line, package management, and system services."
+      },
+      {
+        "topic_id": "networking-fundamentals",
+        "reason": "VM and container networking requires understanding of bridges, VLANs, subnets, and DNS."
+      }
+    ],
+    "helpful": [
+      {
+        "topic_id": "zfs",
+        "reason": "ZFS is the recommended storage backend for Proxmox. Not required but significantly improves storage management."
+      }
+    ],
+    "deep_background": [
+      {
+        "topic_id": "operating-system-internals",
+        "reason": "Understanding kernel namespaces and cgroups explains how LXC containers work under the hood."
+      }
+    ]
+  },
+  "related_topics": ["docker", "kubernetes", "terraform"],
+  "modules": [
+    {
+      "id": "proxmox-ve/installation",
+      "title": "Installation & First Steps",
+      "description": "Install Proxmox VE and navigate the web interface.",
+      "learning_objectives": [
+        "Install Proxmox VE from ISO",
+        "Navigate the web management interface",
+        "Understand the Proxmox architecture"
+      ],
+      "estimated_minutes": 60,
+      "order": 1,
+      "lessons": [
+        {
+          "id": "proxmox-ve/installation/getting-started",
+          "title": "Getting Started with Proxmox",
+          "order": 1,
+          "estimated_minutes": 15,
+          "content": {
+            "sections": [
+              {
+                "type": "text",
+                "body": "Proxmox Virtual Environment (Proxmox VE) is an open-source server virtualization platform built on Debian Linux. It integrates KVM hypervisor and LXC containers into a single solution with a powerful web-based management interface."
+              },
+              {
+                "type": "callout",
+                "variant": "prerequisite",
+                "body": "This lesson assumes you are comfortable with Linux command-line basics. If not, complete the Linux Administration prerequisite first.",
+                "concept_ref": "linux-command-line"
+              },
+              {
+                "type": "code",
+                "language": "bash",
+                "title": "Check Proxmox version",
+                "code": "pveversion --verbose",
+                "explanation": "This command displays the installed Proxmox VE version and all component versions."
+              },
+              {
+                "type": "diagram",
+                "format": "mermaid",
+                "title": "Proxmox Architecture Overview",
+                "source": "graph TD\n    WebUI[Web Interface] --> API[REST API]\n    API --> KVM[KVM Hypervisor]\n    API --> LXC[LXC Containers]\n    API --> Storage[Storage Layer]\n    KVM --> Hardware[Physical Hardware]\n    LXC --> Hardware"
+              },
+              {
+                "type": "table",
+                "headers": ["Feature", "KVM VMs", "LXC Containers"],
+                "rows": [
+                  ["Isolation", "Full hardware virtualization", "OS-level isolation"],
+                  ["Performance", "Near-native with VirtIO", "Native performance"],
+                  ["Use Case", "Different OS, full isolation", "Linux workloads, lightweight"]
+                ]
+              },
+              {
+                "type": "image",
+                "url": "https://pve.proxmox.com/wiki/images/proxmox-dashboard.png",
+                "alt": "Proxmox web interface dashboard",
+                "caption": "The Proxmox VE web dashboard showing cluster summary and resource usage."
+              }
+            ]
+          },
+          "concepts_taught": [
+            {
+              "id": "proxmox-ve-platform",
+              "name": "Proxmox VE",
+              "definition": "An open-source server virtualization platform built on Debian Linux that integrates KVM hypervisor and LXC containers with a web-based management interface.",
+              "flashcard": {
+                "front": "What two virtualization technologies does Proxmox VE integrate?",
+                "back": "KVM (full hardware virtualization for VMs) and LXC (OS-level containers for lightweight Linux workloads)."
+              }
+            },
+            {
+              "id": "proxmox-web-interface",
+              "name": "Proxmox Web Interface",
+              "definition": "A browser-based management UI at port 8006 that provides full control over VMs, containers, storage, networking, and cluster operations.",
+              "flashcard": {
+                "front": "How do you access the Proxmox management interface, and what port does it use?",
+                "back": "Via a web browser at https://<host-ip>:8006. It provides a full management UI for VMs, containers, storage, and networking."
+              }
+            }
+          ],
+          "concepts_referenced": [
+            {
+              "id": "linux-command-line",
+              "defined_in": "linux-administration/basics/command-line"
+            },
+            {
+              "id": "kvm-hypervisor",
+              "defined_in": "virtualization-concepts/hypervisors/kvm"
+            }
+          ],
+          "examples": [
+            {
+              "title": "Access the web interface",
+              "description": "After installation, access Proxmox via browser.",
+              "code": "# Open in browser: https://192.168.1.100:8006\n# Login with root and the password set during installation",
+              "explanation": "The web interface runs on port 8006 with a self-signed SSL certificate. Accept the browser warning on first access."
+            }
+          ],
+          "exercises": [
+            {
+              "type": "exploration",
+              "title": "Explore the Proxmox Dashboard",
+              "instructions": "Log into the Proxmox web interface. Navigate through the main sections: Datacenter, Node, Storage. Identify where you would create a new VM and a new container.",
+              "success_criteria": [
+                "You can identify the datacenter summary view",
+                "You can find the VM creation button",
+                "You can find the container creation button",
+                "You can view storage configuration"
+              ],
+              "hints": [
+                "The left sidebar shows the datacenter tree",
+                "Right-click on a node to see creation options"
+              ],
+              "environment": "A running Proxmox VE installation accessible via web browser"
+            },
+            {
+              "type": "command",
+              "title": "Verify Proxmox Installation",
+              "instructions": "SSH into your Proxmox host and run commands to verify the installation is healthy: check the version, verify services are running, and confirm storage is available.",
+              "success_criteria": [
+                "pveversion shows the installed version",
+                "systemctl status pvedaemon shows active",
+                "pvesm status shows at least one storage target"
+              ],
+              "hints": [
+                "Use pveversion --verbose for detailed component versions",
+                "Check pveproxy status as well — it serves the web UI"
+              ],
+              "environment": "SSH access to a Proxmox VE host"
+            }
+          ],
+          "review_questions": [
+            {
+              "question": "What are the two virtualization technologies integrated in Proxmox VE, and when would you choose one over the other?",
+              "answer": "KVM for full hardware virtualization (needed for non-Linux OSes, full isolation) and LXC for OS-level containers (better performance, lower overhead, but Linux-only workloads).",
+              "concepts_tested": ["proxmox-ve-platform"]
+            },
+            {
+              "question": "Why does Proxmox use a self-signed SSL certificate by default, and what should you do about it in production?",
+              "answer": "Self-signed certificates are generated during installation for immediate HTTPS access. In production, replace with a proper certificate from Let's Encrypt or your organization's CA to avoid browser warnings and man-in-the-middle risks.",
+              "concepts_tested": ["proxmox-web-interface"]
+            }
+          ]
+        },
+        {
+          "id": "proxmox-ve/installation/post-install",
+          "title": "Post-Installation Configuration",
+          "order": 2,
+          "estimated_minutes": 20,
+          "content": {
+            "sections": [
+              {
+                "type": "text",
+                "body": "After installing Proxmox VE, several configuration steps are recommended before creating your first workload."
+              },
+              {
+                "type": "callout",
+                "variant": "tip",
+                "body": "Disable the enterprise repository if you don't have a subscription to avoid apt update errors."
+              },
+              {
+                "type": "code",
+                "language": "bash",
+                "title": "Disable enterprise repo and enable no-subscription repo",
+                "code": "# Disable enterprise repo\nsed -i 's/^deb/# deb/' /etc/apt/sources.list.d/pve-enterprise.list\n\n# Add no-subscription repo\necho 'deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription' > /etc/apt/sources.list.d/pve-no-subscription.list\n\napt update && apt full-upgrade -y",
+                "explanation": "The enterprise repository requires a paid subscription. The no-subscription repository is suitable for home labs and testing."
+              }
+            ]
+          },
+          "concepts_taught": [
+            {
+              "id": "proxmox-repositories",
+              "name": "Proxmox Package Repositories",
+              "definition": "Proxmox offers enterprise (paid, stable) and no-subscription (free, suitable for testing/homelab) package repositories for system updates.",
+              "flashcard": {
+                "front": "What is the difference between Proxmox's enterprise and no-subscription repositories?",
+                "back": "Enterprise requires a paid subscription and receives tested, stable updates. No-subscription is free, gets the same packages but with less testing — suitable for home labs."
+              }
+            }
+          ],
+          "concepts_referenced": [],
+          "examples": [],
+          "exercises": [
+            {
+              "type": "configuration",
+              "title": "Configure Proxmox Repositories",
+              "instructions": "Disable the enterprise repository and enable the no-subscription repository on your Proxmox host. Then update all packages.",
+              "success_criteria": [
+                "apt update completes without errors",
+                "No enterprise repository warnings appear"
+              ],
+              "hints": [
+                "Check /etc/apt/sources.list.d/ for repository files"
+              ],
+              "environment": "SSH access to a fresh Proxmox VE installation"
+            }
+          ],
+          "review_questions": [
+            {
+              "question": "Why might you still want the enterprise repository in a production environment even though the no-subscription repository has the same packages?",
+              "answer": "Enterprise packages undergo additional QA testing before release, reducing the risk of updates introducing bugs in production. The subscription also provides access to Proxmox support.",
+              "concepts_tested": ["proxmox-repositories"]
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "questions": [
+          {
+            "type": "conceptual",
+            "question": "Explain the difference between KVM and LXC in Proxmox and when you would choose each.",
+            "answer": "KVM provides full hardware virtualization — each VM gets its own kernel and can run any OS. LXC provides OS-level containers that share the host kernel — lighter weight and better performance but limited to Linux. Choose KVM for Windows guests or when you need full isolation; choose LXC for Linux workloads where performance and resource efficiency matter.",
+            "concepts_tested": ["proxmox-ve-platform"]
+          },
+          {
+            "type": "practical",
+            "question": "You just installed Proxmox and apt update gives a 401 error about the enterprise repository. How do you fix this?",
+            "answer": "Disable the enterprise repository by commenting out or removing /etc/apt/sources.list.d/pve-enterprise.list, then add the no-subscription repository. Run apt update again.",
+            "concepts_tested": ["proxmox-repositories"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "proxmox-ve/networking",
+      "title": "Networking in Proxmox",
+      "description": "Configure virtual networks, bridges, VLANs, and firewall rules for VMs and containers.",
+      "learning_objectives": [
+        "Configure Linux bridges for VM connectivity",
+        "Set up VLAN-aware networking",
+        "Troubleshoot common networking issues"
+      ],
+      "estimated_minutes": 45,
+      "order": 2,
+      "lessons": [
+        {
+          "id": "proxmox-ve/networking/vlan-configuration",
+          "title": "VLAN Configuration in Proxmox",
+          "order": 1,
+          "estimated_minutes": 15,
+          "content": {
+            "sections": [
+              {
+                "type": "text",
+                "body": "Proxmox supports VLAN-aware bridges, allowing you to tag VM traffic with VLAN IDs without creating separate bridges for each VLAN."
+              },
+              {
+                "type": "code",
+                "language": "bash",
+                "title": "Enable VLAN-aware bridge",
+                "code": "auto vmbr0\niface vmbr0 inet static\n    address 10.0.0.1/24\n    bridge-ports enp0s3\n    bridge-stp off\n    bridge-fd 0\n    bridge-vlan-aware yes\n    bridge-vids 2-4094",
+                "explanation": "The bridge-vlan-aware yes flag enables 802.1Q VLAN support on this bridge."
+              }
+            ]
+          },
+          "concepts_taught": [
+            {
+              "id": "proxmox-vlan-aware-bridge",
+              "name": "VLAN-aware bridge (Proxmox)",
+              "definition": "A Linux bridge with 802.1Q support enabled, allowing per-VM VLAN tagging without creating separate bridges for each VLAN.",
+              "flashcard": {
+                "front": "What does bridge-vlan-aware yes do in a Proxmox network config?",
+                "back": "Enables 802.1Q VLAN support on the bridge, so individual VMs can be assigned VLAN tags without needing separate bridges per VLAN."
+              }
+            }
+          ],
+          "concepts_referenced": [
+            {
+              "id": "vlan-tagging",
+              "defined_in": "networking-fundamentals/vlans-and-trunking"
+            },
+            {
+              "id": "linux-bridge",
+              "defined_in": "networking-fundamentals/bridging"
+            }
+          ],
+          "examples": [
+            {
+              "title": "Assign a VM to VLAN 100",
+              "description": "Set the VLAN tag on a VM's network device via CLI.",
+              "code": "qm set 100 -net0 virtio,bridge=vmbr0,tag=100",
+              "explanation": "The tag=100 parameter tags all traffic from this VM with VLAN ID 100."
+            }
+          ],
+          "exercises": [
+            {
+              "type": "configuration",
+              "title": "Create an isolated management VLAN",
+              "instructions": "Create a VLAN-aware bridge and configure two VMs: one on VLAN 10 (management) and one on VLAN 20 (application). Verify they cannot communicate with each other.",
+              "success_criteria": [
+                "Both VMs can reach the Proxmox host",
+                "VM on VLAN 10 cannot ping VM on VLAN 20",
+                "bridge vlan show confirms VLAN assignments"
+              ],
+              "hints": [
+                "You'll need a managed switch or virtual router for inter-VLAN routing",
+                "Use bridge vlan show on the Proxmox host to verify VLAN assignments"
+              ],
+              "environment": "A running Proxmox server with at least two VMs"
+            },
+            {
+              "type": "troubleshooting",
+              "title": "VM Can't Reach the Network",
+              "instructions": "A VM was recently moved to VLAN 20 but can no longer reach any other hosts. The VM's IP configuration looks correct. Diagnose and fix the issue.",
+              "success_criteria": [
+                "Identified that the bridge is not VLAN-aware",
+                "Enabled VLAN-aware mode on the bridge",
+                "VM can now reach hosts on VLAN 20"
+              ],
+              "hints": [
+                "Check if the bridge has bridge-vlan-aware yes",
+                "Use bridge vlan show to see current VLAN assignments"
+              ],
+              "environment": "A Proxmox server with a misconfigured bridge"
+            },
+            {
+              "type": "thought_experiment",
+              "title": "VLAN Design for a Multi-Tenant Environment",
+              "instructions": "Consider a scenario where you host VMs for three separate clients on a single Proxmox node. Each client must be completely isolated from the others at the network level. Design a VLAN strategy that achieves this isolation while allowing each client to have their own internal network. Consider: How many VLANs do you need? How would you handle a client needing internet access? What happens if a client's VM is compromised?",
+              "success_criteria": [
+                "Identified that each client needs at least one unique VLAN",
+                "Explained how internet access would be routed per-VLAN",
+                "Discussed blast radius containment if one client's VM is compromised"
+              ],
+              "hints": [
+                "Think about what happens at the firewall level for inter-VLAN traffic",
+                "Consider whether you need separate bridges or one VLAN-aware bridge"
+              ],
+              "environment": "none — just think"
+            }
+          ],
+          "review_questions": [
+            {
+              "question": "What is the advantage of a VLAN-aware bridge over creating separate bridges for each VLAN?",
+              "answer": "A single VLAN-aware bridge handles all VLANs, reducing configuration complexity and resource usage. Without it, you'd need one bridge per VLAN.",
+              "concepts_tested": ["proxmox-vlan-aware-bridge", "vlan-tagging"]
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "questions": [
+          {
+            "type": "conceptual",
+            "question": "Why does Proxmox use Linux bridges instead of virtual switches by default?",
+            "answer": "Linux bridges are native to the kernel, require no additional software, and integrate directly with the host's network stack. They're simpler to configure and debug than OVS for most use cases.",
+            "concepts_tested": ["linux-bridge", "proxmox-vlan-aware-bridge"]
+          },
+          {
+            "type": "practical",
+            "question": "You have two VMs that need to communicate with each other but NOT with the external network. How would you configure this?",
+            "answer": "Create an internal-only bridge (vmbr1) with no physical interface attached. Assign both VMs to this bridge. They can communicate via the bridge but have no route to the outside.",
+            "concepts_tested": ["proxmox-vlan-aware-bridge"]
+          }
+        ]
+      }
+    }
+  ],
+  "source_urls": [
+    "https://pve.proxmox.com/wiki/Main_Page",
+    "https://pve.proxmox.com/wiki/Network_Configuration",
+    "https://pve.proxmox.com/pve-docs/"
+  ],
+  "generated_at": "2026-02-19T07:30:00Z",
+  "version": 1
+}

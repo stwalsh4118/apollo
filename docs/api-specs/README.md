@@ -10,6 +10,7 @@ and ensure consistency across the project.
 | Database | [database-api.md](./database/database-api.md) | SQLite connection, migration system, full schema reference |
 | Curriculum | [curriculum-api.md](./curriculum/curriculum-api.md) | REST endpoints, repository interfaces, models, error handling |
 | Frontend | [frontend-api.md](./frontend/frontend-api.md) | React SPA routes, components, hooks, TypeScript types, API client |
+| Schema | [schema-api.md](./schema/schema-api.md) | JSON schema validation, embedded schemas, research skill prompt |
 
 ## Organization
 
