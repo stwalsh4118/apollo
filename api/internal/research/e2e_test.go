@@ -30,21 +30,22 @@ type e2eEnv struct {
 
 // e2eMockCLI is a mock CLIRunner that records calls and returns canned responses.
 type e2eMockCLI struct {
-	mu        sync.Mutex
-	calls     []e2eCall
-	passNum   int
-	responses map[int]*models.CLIResponse
-	errors    map[int]int
-	attempts  map[int]int
-	blockPass int
-	blocking  chan struct{}
-	blockOnce sync.Once
+	mu             sync.Mutex
+	calls          []e2eCall
+	passNum        int
+	responses      map[int]*models.CLIResponse
+	errors         map[int]int
+	attempts       map[int]int
+	blockPass      int
+	blocking       chan struct{}
+	blockOnce      sync.Once
+	writeFixtures  func(workDir string)
+	fixturesOnPass int // 0 = on initial pass
 }
 
 type e2eCall struct {
 	Method    string // "initial" or "resume"
 	SessionID string
-	HasSchema bool
 }
 
 func newE2ECLI() *e2eMockCLI {
@@ -67,6 +68,11 @@ func (m *e2eMockCLI) RunInitialPass(_ context.Context, opts research.InitialPass
 		return nil, fmt.Errorf("mock CLI error pass 1")
 	}
 
+	// Write fixture files on initial pass if configured.
+	if m.writeFixtures != nil && (m.fixturesOnPass == 0 || m.fixturesOnPass == 1) {
+		m.writeFixtures(opts.WorkDir)
+	}
+
 	if resp, ok := m.responses[1]; ok {
 		return resp, nil
 	}
@@ -87,7 +93,6 @@ func (m *e2eMockCLI) RunResumePass(ctx context.Context, opts research.ResumePass
 	call := e2eCall{
 		Method:    "resume",
 		SessionID: opts.SessionID,
-		HasSchema: opts.JSONSchemaFile != "",
 	}
 	m.calls = append(m.calls, call)
 
@@ -101,6 +106,11 @@ func (m *e2eMockCLI) RunResumePass(ctx context.Context, opts research.ResumePass
 	if failures, ok := m.errors[currentPass]; ok && m.attempts[currentPass] <= failures {
 		m.mu.Unlock()
 		return nil, fmt.Errorf("mock CLI error pass %d", currentPass)
+	}
+
+	// Write fixture files on the specified pass if configured.
+	if m.writeFixtures != nil && m.fixturesOnPass == currentPass {
+		m.writeFixtures(opts.WorkDir)
 	}
 
 	if resp, ok := m.responses[currentPass]; ok {
@@ -168,16 +178,13 @@ func setupE2E(t *testing.T, cli *e2eMockCLI) *e2eEnv {
 	}
 }
 
-// TestE2EHappyPath verifies AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC10.
+// TestE2EHappyPath verifies AC1, AC2, AC3, AC5, AC6, AC7, AC10.
 func TestE2EHappyPath(t *testing.T) {
 	cli := newE2ECLI()
 
-	// Pass 4 returns valid curriculum.
-	cli.responses[4] = &models.CLIResponse{
-		SessionID:        "e2e-session",
-		Result:           "curriculum generated",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	}
+	// The mock writes fixture files to the work directory.
+	// After all 4 passes, the orchestrator assembles from the file tree.
+	cli.writeFixtures = writeSampleFixtureTree
 
 	env := setupE2E(t, cli)
 
@@ -222,11 +229,6 @@ func TestE2EHappyPath(t *testing.T) {
 		}
 	}
 
-	// AC4: Final pass includes --json-schema.
-	if !calls[3].HasSchema {
-		t.Fatal("AC4: final pass should have --json-schema flag")
-	}
-
 	// AC7: GET /api/research/jobs/:id shows published with progress.
 	resp = doGet(t, env.server.URL+"/api/research/jobs/"+job.ID)
 	if resp.StatusCode != http.StatusOK {
@@ -255,7 +257,6 @@ func TestE2EHappyPath(t *testing.T) {
 	}
 
 	// AC5, AC10: Topic stored and browsable via API.
-	// Verify via direct DB query that the topic was stored (the ingester created it).
 	topicJob, err := env.repo.GetJobByID(context.Background(), job.ID)
 	if err != nil {
 		t.Fatalf("AC5: get job: %v", err)
@@ -366,12 +367,6 @@ func TestE2EJobCancellation(t *testing.T) {
 	cli.blockPass = 2
 	cli.blocking = make(chan struct{})
 
-	cli.responses[4] = &models.CLIResponse{
-		SessionID:        "e2e-session",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	}
-
 	env := setupE2E(t, cli)
 
 	// Create job.
@@ -419,12 +414,7 @@ func TestE2EJobCancellation(t *testing.T) {
 // TestE2EProgressTracking verifies AC6 and AC7 in more detail.
 func TestE2EProgressTracking(t *testing.T) {
 	cli := newE2ECLI()
-
-	cli.responses[4] = &models.CLIResponse{
-		SessionID:        "e2e-session",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	}
+	cli.writeFixtures = writeSampleFixtureTree
 
 	env := setupE2E(t, cli)
 

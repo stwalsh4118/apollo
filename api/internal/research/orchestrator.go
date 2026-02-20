@@ -2,6 +2,7 @@ package research
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,7 +34,7 @@ var passPrompts = map[int]string{
 	1: "Survey this topic: identify the key areas, plan modules and lessons, and outline the curriculum structure. Focus on breadth — cover the full landscape before going deep.",
 	2: "Deep dive: generate detailed lesson content for every module and lesson you planned. Include thorough explanations, key concepts with definitions, and flashcards for each concept.",
 	3: "Generate exercises, practice problems, and review questions for every lesson. Include worked examples with explanations. Ensure exercises match the lesson difficulty.",
-	4: "Final validation pass: review all content for accuracy, completeness, and consistency. Output the complete curriculum as structured JSON matching the curriculum schema.",
+	4: "Final validation pass: review all content for accuracy, completeness, and consistency. Read through the file tree and fix any issues by rewriting individual files.",
 }
 
 // Orchestrator drives the research pipeline from queued job to published curriculum.
@@ -186,8 +187,8 @@ func (o *Orchestrator) RunJob(ctx context.Context, jobID string) error {
 		return o.failJob(ctx, jobID, fmt.Errorf("pass 3: %w", err))
 	}
 
-	// Pass 4: Validation + Structured Output.
-	resp, err := o.runFinalPass(jobCtx, jobID, sessionID, workDir, log)
+	// Pass 4: Validation (quality review of the file tree).
+	_, err = o.runPass(jobCtx, jobID, 4, passPrompts[4], sessionID, workDir, log)
 	if err != nil {
 		if jobCtx.Err() != nil {
 			return o.handleCancellation(jobID, log)
@@ -201,8 +202,23 @@ func (o *Orchestrator) RunJob(ctx context.Context, jobID string) error {
 		return o.failJob(ctx, jobID, fmt.Errorf("update status to resolving: %w", err))
 	}
 
-	// Ingest the curriculum.
-	if err := o.ingest.Ingest(jobCtx, resp.StructuredOutput); err != nil {
+	// Assemble the file tree into a CurriculumOutput.
+	curriculum, err := AssembleFromDir(workDir)
+	if err != nil {
+		return o.failJob(ctx, jobID, fmt.Errorf("assemble curriculum: %w", err))
+	}
+
+	assembledJSON, err := json.Marshal(curriculum)
+	if err != nil {
+		return o.failJob(ctx, jobID, fmt.Errorf("marshal assembled curriculum: %w", err))
+	}
+
+	// Ingest the assembled curriculum.
+	if err := o.ingest.Ingest(jobCtx, json.RawMessage(assembledJSON)); err != nil {
+		if jobCtx.Err() != nil {
+			return o.handleCancellation(jobID, log)
+		}
+
 		return o.failJob(ctx, jobID, fmt.Errorf("ingest curriculum: %w", err))
 	}
 
@@ -306,6 +322,11 @@ func (o *Orchestrator) runPass(ctx context.Context, jobID string, passNum int, p
 
 		if err != nil {
 			lastErr = err
+
+			if ctx.Err() != nil {
+				break
+			}
+
 			continue
 		}
 
@@ -320,46 +341,6 @@ func (o *Orchestrator) runPass(ctx context.Context, jobID string, passNum int, p
 	}
 
 	return "", fmt.Errorf("pass %d failed after %d attempts: %w", passNum, maxRetries+1, lastErr)
-}
-
-// runFinalPass executes Pass 4 with the --json-schema flag and returns the response.
-func (o *Orchestrator) runFinalPass(ctx context.Context, jobID, sessionID, workDir string, log zerolog.Logger) (*models.CLIResponse, error) {
-	log.Info().Int("pass", 4).Msg("starting final pass")
-
-	var lastErr error
-
-	for attempt := 0; attempt <= maxRetries; attempt++ {
-		if attempt > 0 {
-			log.Warn().Int("pass", 4).Int("attempt", attempt+1).Msg("retrying final pass")
-		}
-
-		resp, err := o.cli.RunResumePass(ctx, ResumePassOpts{
-			Prompt:         passPrompts[4],
-			SessionID:      sessionID,
-			WorkDir:        workDir,
-			JSONSchemaFile: embeddedCurriculumSchema,
-		})
-		if err != nil {
-			lastErr = err
-			continue
-		}
-
-		if len(resp.StructuredOutput) == 0 {
-			lastErr = fmt.Errorf("final pass returned no structured output")
-			continue
-		}
-
-		// Update progress for pass 4.
-		if err := o.updateProgress(ctx, jobID, 4); err != nil {
-			log.Warn().Err(err).Msg("failed to update progress for final pass")
-		}
-
-		log.Info().Int("pass", 4).Msg("final pass completed")
-
-		return resp, nil
-	}
-
-	return nil, fmt.Errorf("pass 4 failed after %d attempts: %w", maxRetries+1, lastErr)
 }
 
 // updateProgress writes the current pipeline progress to the job record.

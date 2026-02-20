@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -21,12 +22,14 @@ import (
 // It tracks a logical pass counter: pass 1 for RunInitialPass, then passes 2, 3, 4
 // for sequential RunResumePass calls. The counter only advances after a successful call.
 type mockCLIRunner struct {
-	mu         sync.Mutex
-	totalCalls int
-	passNum    int                         // current logical pass being attempted
-	responses  map[int]*models.CLIResponse // pass number -> response
-	errors     map[int]int                 // pass number -> number of failures before success
-	attempts   map[int]int                 // pass number -> attempts so far
+	mu             sync.Mutex
+	totalCalls     int
+	passNum        int                         // current logical pass being attempted
+	responses      map[int]*models.CLIResponse // pass number -> response
+	errors         map[int]int                 // pass number -> number of failures before success
+	attempts       map[int]int                 // pass number -> attempts so far
+	writeFixtures  func(workDir string)        // called with workDir to write fixture files
+	fixturesOnPass int                         // pass number to write fixtures on (0 = on initial pass)
 }
 
 func newMockCLI() *mockCLIRunner {
@@ -38,15 +41,11 @@ func newMockCLI() *mockCLIRunner {
 	}
 }
 
-func (m *mockCLIRunner) setResponse(passNum int, resp *models.CLIResponse) {
-	m.responses[passNum] = resp
-}
-
 func (m *mockCLIRunner) setFailCount(passNum int, count int) {
 	m.errors[passNum] = count
 }
 
-func (m *mockCLIRunner) RunInitialPass(_ context.Context, _ research.InitialPassOpts) (*models.CLIResponse, error) {
+func (m *mockCLIRunner) RunInitialPass(_ context.Context, opts research.InitialPassOpts) (*models.CLIResponse, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -58,6 +57,11 @@ func (m *mockCLIRunner) RunInitialPass(_ context.Context, _ research.InitialPass
 		return nil, fmt.Errorf("mock CLI error for pass 1 (attempt %d)", m.attempts[1])
 	}
 
+	// Write fixture files on initial pass if configured.
+	if m.writeFixtures != nil && (m.fixturesOnPass == 0 || m.fixturesOnPass == 1) {
+		m.writeFixtures(opts.WorkDir)
+	}
+
 	if resp, ok := m.responses[1]; ok {
 		return resp, nil
 	}
@@ -65,7 +69,7 @@ func (m *mockCLIRunner) RunInitialPass(_ context.Context, _ research.InitialPass
 	return &models.CLIResponse{SessionID: "session-abc", Result: "pass 1 done"}, nil
 }
 
-func (m *mockCLIRunner) RunResumePass(ctx context.Context, _ research.ResumePassOpts) (*models.CLIResponse, error) {
+func (m *mockCLIRunner) RunResumePass(ctx context.Context, opts research.ResumePassOpts) (*models.CLIResponse, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -90,6 +94,11 @@ func (m *mockCLIRunner) RunResumePass(ctx context.Context, _ research.ResumePass
 		return nil, fmt.Errorf("mock CLI error for pass %d (attempt %d)", currentPass, m.attempts[currentPass])
 	}
 
+	// Write fixture files on the specified pass if configured.
+	if m.writeFixtures != nil && m.fixturesOnPass == currentPass {
+		m.writeFixtures(opts.WorkDir)
+	}
+
 	if resp, ok := m.responses[currentPass]; ok {
 		return resp, nil
 	}
@@ -112,6 +121,89 @@ func (m *mockCLIRunner) callCount() int {
 	defer m.mu.Unlock()
 
 	return m.totalCalls
+}
+
+// writeSampleFixtureTree writes a valid file-per-lesson directory tree to workDir
+// matching the sampleCurriculum content. This simulates what the CLI agent would
+// produce during passes 1-4.
+func writeSampleFixtureTree(workDir string) {
+	topic := map[string]any{
+		"id": "go-concurrency", "title": "Go Concurrency",
+		"description": "Learn concurrent programming in Go.",
+		"difficulty":  "intermediate", "estimated_hours": 10,
+		"tags": []string{"go", "concurrency"},
+		"prerequisites": map[string]any{
+			"essential":       []any{map[string]any{"topic_id": "go-basics", "reason": "Need Go fundamentals"}},
+			"helpful":         []any{map[string]any{"topic_id": "os-threads", "reason": "Understanding OS threads helps"}},
+			"deep_background": []any{map[string]any{"topic_id": "csp-theory", "reason": "CSP theory background"}},
+		},
+		"related_topics": []string{"go-networking"},
+		"source_urls":    []string{"https://go.dev/doc"},
+		"generated_at":   "2026-02-19T08:00:00Z",
+		"version":        1,
+		"module_plan": []any{
+			map[string]any{"id": "go-concurrency/goroutines", "title": "Goroutines", "description": "Lightweight threads in Go.", "order": 1},
+		},
+	}
+	writeJSON(filepath.Join(workDir, "topic.json"), topic)
+
+	modDir := filepath.Join(workDir, "modules", "01-goroutines")
+	os.MkdirAll(modDir, 0o755)
+
+	mod := map[string]any{
+		"id": "go-concurrency/goroutines", "title": "Goroutines",
+		"description": "Lightweight threads in Go.", "order": 1,
+		"learning_objectives": []string{"Understand goroutines"},
+		"estimated_minutes":   60,
+		"assessment": map[string]any{
+			"questions": []any{
+				map[string]any{"type": "conceptual", "question": "Explain goroutines.", "answer": "Lightweight threads.", "concepts_tested": []string{"goroutine"}},
+			},
+		},
+	}
+	writeJSON(filepath.Join(modDir, "module.json"), mod)
+
+	lesson1 := map[string]any{
+		"id": "go-concurrency/goroutines/intro", "title": "Introduction to Goroutines",
+		"order": 1, "estimated_minutes": 30,
+		"content": map[string]any{"sections": []any{map[string]any{"type": "text", "body": "Goroutines are lightweight threads."}}},
+		"concepts_taught": []any{
+			map[string]any{
+				"id": "goroutine", "name": "Goroutine",
+				"definition": "A lightweight thread managed by the Go runtime.",
+				"flashcard":  map[string]any{"front": "What is a goroutine?", "back": "A lightweight thread managed by the Go runtime."},
+			},
+		},
+		"concepts_referenced": []any{},
+		"examples":            []any{map[string]any{"title": "Basic goroutine", "description": "Launch a goroutine", "code": "go func() {}()", "explanation": "Creates a new goroutine."}},
+		"exercises":           []any{map[string]any{"type": "command", "title": "Run goroutine", "instructions": "Launch a goroutine", "success_criteria": []string{"Goroutine runs"}, "hints": []string{"Use go keyword"}, "environment": "terminal"}},
+		"review_questions":    []any{map[string]any{"question": "What is a goroutine?", "answer": "A lightweight thread.", "concepts_tested": []string{"goroutine"}}},
+	}
+	writeJSON(filepath.Join(modDir, "01-intro.json"), lesson1)
+
+	lesson2 := map[string]any{
+		"id": "go-concurrency/goroutines/sync", "title": "Synchronizing Goroutines",
+		"order": 2, "estimated_minutes": 30,
+		"content": map[string]any{"sections": []any{map[string]any{"type": "text", "body": "Use WaitGroup for synchronization."}}},
+		"concepts_taught": []any{
+			map[string]any{
+				"id": "waitgroup", "name": "WaitGroup",
+				"definition": "A synchronization primitive for waiting on goroutines.",
+				"flashcard":  map[string]any{"front": "What is sync.WaitGroup?", "back": "A synchronization primitive for waiting on goroutines."},
+			},
+		},
+		"concepts_referenced": []any{map[string]any{"id": "goroutine", "defined_in": "go-concurrency/goroutines/intro"}},
+		"examples":            []any{},
+		"exercises":           []any{},
+		"review_questions":    []any{},
+	}
+	writeJSON(filepath.Join(modDir, "02-sync.json"), lesson2)
+}
+
+func writeJSON(path string, v any) {
+	data, _ := json.MarshalIndent(v, "", "  ")
+	os.MkdirAll(filepath.Dir(path), 0o755)
+	os.WriteFile(path, data, 0o644)
 }
 
 // Helper to create the test orchestrator with real DB repo and mocked CLI.
@@ -139,12 +231,9 @@ func setupOrchestrator(t *testing.T, cli research.CLIRunner) (*research.Orchestr
 func TestOrchestratorHappyPath(t *testing.T) {
 	cli := newMockCLI()
 
-	// Pass 4 returns structured output that passes schema validation.
-	cli.setResponse(4, &models.CLIResponse{
-		SessionID:        "session-abc",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	})
+	// The mock writes fixture files to the work directory on initial pass.
+	// After all 4 passes, the orchestrator assembles from the file tree.
+	cli.writeFixtures = writeSampleFixtureTree
 
 	orch, _, repo := setupOrchestrator(t, cli)
 
@@ -201,12 +290,8 @@ func TestOrchestratorPassRetrySuccess(t *testing.T) {
 	// Pass 2 fails once then succeeds on retry.
 	cli.setFailCount(2, 1)
 
-	// Pass 4 returns structured output.
-	cli.setResponse(4, &models.CLIResponse{
-		SessionID:        "session-abc",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	})
+	// Write fixture files on initial pass for assembly.
+	cli.writeFixtures = writeSampleFixtureTree
 
 	orch, _, repo := setupOrchestrator(t, cli)
 
@@ -279,9 +364,8 @@ func TestOrchestratorCancellation(t *testing.T) {
 
 	// We'll use a slow mock that checks context.
 	slowCLI := &slowMockCLI{
-		blockPass:  2,
-		sessionID:  "session-abc",
-		curriculum: json.RawMessage(sampleCurriculum),
+		blockPass: 2,
+		sessionID: "session-abc",
 	}
 
 	orch, _, repo := setupOrchestrator(t, slowCLI)
@@ -329,13 +413,12 @@ func TestOrchestratorCancellation(t *testing.T) {
 
 // slowMockCLI blocks on a specified pass until context is cancelled.
 type slowMockCLI struct {
-	blockPass  int
-	sessionID  string
-	curriculum json.RawMessage
-	mu         sync.Mutex
-	callNum    int
-	blocking   chan struct{}
-	once       sync.Once
+	blockPass int
+	sessionID string
+	mu        sync.Mutex
+	callNum   int
+	blocking  chan struct{}
+	once      sync.Once
 }
 
 func (s *slowMockCLI) init() {
@@ -373,26 +456,13 @@ func (s *slowMockCLI) RunResumePass(ctx context.Context, _ research.ResumePassOp
 		return nil, ctx.Err()
 	}
 
-	if num == 4 {
-		return &models.CLIResponse{
-			SessionID:        s.sessionID,
-			Result:           "done",
-			StructuredOutput: s.curriculum,
-		}, nil
-	}
-
 	return &models.CLIResponse{SessionID: s.sessionID, Result: fmt.Sprintf("pass %d done", num)}, nil
 }
 
-func TestOrchestratorSchemaValidationFailure(t *testing.T) {
+func TestOrchestratorAssemblyFailure(t *testing.T) {
 	cli := newMockCLI()
 
-	// Pass 4 returns invalid structured output (not matching curriculum schema).
-	cli.setResponse(4, &models.CLIResponse{
-		SessionID:        "session-abc",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(`{"bad": "data"}`),
-	})
+	// Don't write fixture files — assembly will fail due to missing topic.json.
 
 	orch, _, repo := setupOrchestrator(t, cli)
 
@@ -405,7 +475,7 @@ func TestOrchestratorSchemaValidationFailure(t *testing.T) {
 
 	err = orch.RunJob(context.Background(), job.ID)
 	if err == nil {
-		t.Fatal("expected error for invalid structured output")
+		t.Fatal("expected error for failed assembly")
 	}
 
 	updated, err := repo.GetJobByID(context.Background(), job.ID)
@@ -418,18 +488,13 @@ func TestOrchestratorSchemaValidationFailure(t *testing.T) {
 	}
 
 	if updated.Error == "" {
-		t.Fatal("expected error message for schema validation failure")
+		t.Fatal("expected error message for assembly failure")
 	}
 }
 
 func TestOrchestratorProgressTracking(t *testing.T) {
 	cli := newMockCLI()
-
-	cli.setResponse(4, &models.CLIResponse{
-		SessionID:        "session-abc",
-		Result:           "done",
-		StructuredOutput: json.RawMessage(sampleCurriculum),
-	})
+	cli.writeFixtures = writeSampleFixtureTree
 
 	orch, _, repo := setupOrchestrator(t, cli)
 
@@ -474,37 +539,4 @@ func TestOrchestratorCancelMethod(t *testing.T) {
 
 	// Cancel a non-existent job should not panic.
 	orch.Cancel("nonexistent-id")
-}
-
-func TestOrchestratorFinalPassNoStructuredOutput(t *testing.T) {
-	cli := newMockCLI()
-
-	// Pass 4 returns response with empty structured output.
-	cli.setResponse(4, &models.CLIResponse{
-		SessionID: "session-abc",
-		Result:    "done",
-	})
-
-	orch, _, repo := setupOrchestrator(t, cli)
-
-	job, err := repo.CreateJob(context.Background(), models.CreateResearchJobInput{
-		Topic: "Go Concurrency",
-	})
-	if err != nil {
-		t.Fatalf("create job: %v", err)
-	}
-
-	err = orch.RunJob(context.Background(), job.ID)
-	if err == nil {
-		t.Fatal("expected error for missing structured output")
-	}
-
-	updated, err := repo.GetJobByID(context.Background(), job.ID)
-	if err != nil {
-		t.Fatalf("get job: %v", err)
-	}
-
-	if updated.Status != models.ResearchStatusFailed {
-		t.Fatalf("expected status 'failed', got %q", updated.Status)
-	}
 }
