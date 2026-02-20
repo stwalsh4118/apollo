@@ -8,11 +8,11 @@ This document lists all tasks associated with PBI 15.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 15-1 | [Per-File Output Types & Directory Constants](./15-1.md) | Proposed | Define Go structs for intermediate file formats (TopicFile, ModuleFile) and constants for directory naming conventions |
-| 15-2 | [Directory Tree Assembler](./15-2.md) | Proposed | Implement Go assembler that walks the modules/ directory tree and produces a valid CurriculumOutput |
-| 15-3 | [Update Research System Prompt](./15-3.md) | Proposed | Rewrite research.md pass instructions for file-per-lesson output instead of monolithic JSON |
-| 15-4 | [Orchestrator Integration](./15-4.md) | Proposed | Replace runFinalPass with runPass + assembleFromDir, remove --json-schema from Pass 4 |
-| 15-5 | [E2E Conditions of Satisfaction Test](./15-5.md) | Proposed | Verify full pipeline with file-per-lesson output meets all acceptance criteria |
+| 15-1 | [Per-File Output Types & Directory Constants](./15-1.md) | Done | Define Go structs for intermediate file formats (TopicFile, ModuleFile) and constants for directory naming conventions |
+| 15-2 | [Directory Tree Assembler](./15-2.md) | Done | Implement Go assembler that walks the modules/ directory tree and produces a valid CurriculumOutput |
+| 15-3 | [Update Research System Prompt](./15-3.md) | Done | Rewrite research.md pass instructions for file-per-lesson output instead of monolithic JSON |
+| 15-4 | [Orchestrator Integration](./15-4.md) | Done | Replace runFinalPass with runPass + assembleFromDir, remove --json-schema from Pass 4 |
+| 15-5 | [E2E Conditions of Satisfaction Test](./15-5.md) | Done | Verify full pipeline with file-per-lesson output meets all acceptance criteria |
 
 ## Dependency Graph
 
