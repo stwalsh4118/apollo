@@ -75,4 +75,4 @@ None — the approach is clear from the first full pipeline run data.
 
 ## Related Tasks
 
-_Tasks will be created when this PBI is planned via `/plan-pbi 16`._
+[View Tasks](./tasks.md)
