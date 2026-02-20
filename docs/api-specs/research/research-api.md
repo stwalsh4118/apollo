@@ -89,3 +89,51 @@ The `CancelFunc` is provided by the orchestrator (Task 6-7) during server startu
 | 400 | Missing/empty topic, cancel on terminal job, invalid JSON |
 | 404 | Job not found |
 | 500 | Internal server error |
+
+## File-Per-Lesson Pipeline (Internal)
+
+### Directory Structure
+
+Each research job writes to `data/research/<job-id>/`:
+
+```
+topic.json                    # Pass 1: metadata, prerequisites, module plan
+modules/
+  01-<module-slug>/
+    module.json               # Module metadata, learning objectives, assessment
+    01-<lesson-slug>.json     # Lesson content, concepts, examples
+    02-<lesson-slug>.json
+  02-<module-slug>/
+    module.json
+    01-<lesson-slug>.json
+```
+
+### File Types (`research/filetypes.go`)
+
+```go
+type TopicFile struct { ID, Title, Description, Difficulty string; EstimatedHours float64; Tags, RelatedTopics, SourceURLs []string; Prerequisites PrerequisitesOutput; ModulePlan []ModulePlanEntry; GeneratedAt string; Version int }
+type ModulePlanEntry struct { ID, Title, Description string; Order int }
+type ModuleFile struct { ID, Title, Description string; Order int; LearningObjectives []string; EstimatedMinutes int; Assessment json.RawMessage }
+```
+
+Lesson files use the existing `LessonOutput` struct from `curriculum.go`.
+
+### Constants
+
+```go
+const TopicFileName = "topic.json"
+const ModulesDirName = "modules"
+const ModuleFileBaseName = "module.json"
+```
+
+### Assembler (`research/assembler.go`)
+
+```go
+func AssembleFromDir(workDir string) (*CurriculumOutput, error)
+```
+
+Reads the file tree, sorts by numeric prefix (`01-`, `02-`), assembles into `CurriculumOutput`, validates against the curriculum schema.
+
+### Orchestrator Flow
+
+All 4 passes use `runPass()` (no `runFinalPass`). After Pass 4, the orchestrator calls `AssembleFromDir(workDir)` → marshals to JSON → feeds to `CurriculumIngester.Ingest()`.

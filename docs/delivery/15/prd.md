@@ -114,4 +114,4 @@ N/A — internal pipeline change. API responses unchanged.
 
 ## Related Tasks
 
-_Tasks will be created when this PBI is planned via `/plan-pbi 15`._
+[View Tasks](./tasks.md)

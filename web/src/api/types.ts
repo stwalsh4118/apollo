@@ -83,13 +83,17 @@ export interface LessonSummary {
   estimated_minutes?: number;
 }
 
+export interface LessonContent {
+  sections: ContentSection[];
+}
+
 interface LessonBase {
   id: string;
   module_id: string;
   title: string;
   sort_order: number;
   estimated_minutes?: number;
-  content: ContentSection[];
+  content: LessonContent;
   examples?: Example[];
   exercises?: Exercise[];
   review_questions?: ReviewQuestion[];

@@ -82,9 +82,9 @@ export default function LessonContent({
         <ConceptChips concepts={concepts} />
       )}
 
-      {lesson.content && lesson.content.length > 0 && (
+      {lesson.content && lesson.content.sections && lesson.content.sections.length > 0 && (
         <div className="mt-6">
-          <ContentRenderer sections={lesson.content} />
+          <ContentRenderer sections={lesson.content.sections} />
         </div>
       )}
 

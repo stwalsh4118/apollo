@@ -1,5 +1,28 @@
 import { useState } from "react";
+import Markdown, { type Components } from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import type { Exercise } from "../api";
+import MarkdownCode from "./content/MarkdownCode";
+
+const mdComponents: Components = {
+  pre({ children }) {
+    return <>{children}</>;
+  },
+  code({ className, children }) {
+    const match = className?.match(/language-(\w+)/);
+    const code = String(children).replace(/\n$/, "");
+
+    if (match) {
+      return <MarkdownCode code={code} language={match[1]} />;
+    }
+
+    return (
+      <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm font-mono text-gray-800">
+        {children}
+      </code>
+    );
+  },
+};
 
 interface ExerciseBlockProps {
   exercise: Exercise;
@@ -22,9 +45,11 @@ export default function ExerciseBlock({ exercise, index }: ExerciseBlockProps) {
         </span>
       </div>
 
-      <p className="whitespace-pre-line text-sm text-gray-700">
-        {exercise.instructions}
-      </p>
+      <div className="prose prose-sm prose-gray max-w-none text-gray-700">
+        <Markdown rehypePlugins={[rehypeRaw]} components={mdComponents}>
+          {exercise.instructions}
+        </Markdown>
+      </div>
 
       {exercise.environment && (
         <p className="mt-2 text-xs text-gray-500">
@@ -50,9 +75,12 @@ export default function ExerciseBlock({ exercise, index }: ExerciseBlockProps) {
             {hints.slice(0, hintsRevealed).map((hint, i) => (
               <div
                 key={i}
-                className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-800"
+                className="prose prose-sm max-w-none rounded bg-amber-50 px-3 py-2 text-sm text-amber-800"
               >
-                <span className="font-medium">Hint {i + 1}:</span> {hint}
+                <span className="font-medium">Hint {i + 1}:</span>
+                <Markdown rehypePlugins={[rehypeRaw]} components={mdComponents}>
+                  {hint}
+                </Markdown>
               </div>
             ))}
           </div>
