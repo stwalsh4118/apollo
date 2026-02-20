@@ -12,6 +12,7 @@
 | 4 | Learner | As a learner, I want to track my progress through lessons and add personal notes so that I can study methodically and capture insights | Done | Progress API stores per-lesson status and notes; frontend shows progress bars per module; mark-complete button works; notes saved and persisted; concept chips link to definitions |
 | 5 | Developer | As a developer, I want a research skill prompt and curriculum JSON schema so that Claude Code sessions produce validated, structured curriculum output | Done | Research skill prompt implements 4-pass pipeline; JSON schema matches PRD section 7; validation logic rejects malformed output; schema file usable with --json-schema flag |
 | 6 | Developer | As a developer, I want the Go orchestrator to spawn Claude Code CLI sessions and run single-topic research end-to-end so that a topic becomes a published curriculum in the knowledge pool | Done | Orchestrator spawns CLI session with correct flags; multi-turn pipeline (survey → deep dive → exercises → validation) executes; structured JSON parsed and stored in SQLite; research job status tracked via API |
+| 15 | Developer | As a developer, I want the research pipeline to produce a file-per-lesson directory tree so that each agent works with small, context-friendly files and Go code handles final assembly | Proposed | Pass 1 writes topic.json + module dirs; Pass 2 sub-agents write individual lesson files (~100-200 lines); Pass 3 adds exercises per-file; Go assembler merges tree into CurriculumOutput; schema validation and ingestion unchanged |
 | 7 | Learner | As a learner, I want to trigger research from the UI and watch progress in real-time so that I know what's happening during long research runs | Proposed | Frontend can submit research requests; progress polling shows current pass, modules planned/completed, prerequisites found; job list shows active and completed jobs; cancel button works |
 | 8 | Developer | As a developer, I want the orchestrator to manage a research queue with recursive prerequisite expansion so that essential prerequisites are auto-researched up to depth 3 | Proposed | Research queue processes topics in order; essential prerequisites auto-queued; depth limit (3) enforced; parallel agent execution (configurable max); helpful/deep stored as available for expansion; expansion queue API exposed |
 | 9 | Developer | As a developer, I want a connection resolver that integrates new curricula into the knowledge pool so that concepts are deduplicated and cross-referenced across topics | Proposed | Exact slug dedup works; fuzzy matching via CLI session identifies near-matches; cross-references injected bidirectionally; unresolved concepts created for missing topics; conflicts flagged for user review |
@@ -41,6 +42,7 @@ _Items are ordered by priority (highest first)._
 | 12 | Concept Map Visualization | [View Details](./12/prd.md) |
 | 13 | Dashboard | [View Details](./13/prd.md) |
 | 14 | Deployment & Configuration | [View Details](./14/prd.md) |
+| 15 | Research Pipeline — File-Per-Lesson Output Structure | [View Details](./15/prd.md) |
 
 ## History
 
@@ -64,3 +66,4 @@ _Items are ordered by priority (highest first)._
 | 2026-02-19 08:15:29 | 6 | Status Change | Proposed → Agreed. Auto-approved for planning. | AI_Agent |
 | 2026-02-19 08:35:26 | 6 | Status Change | Agreed → InProgress. Started implementation. | AI_Agent |
 | 2026-02-20 08:29:09 | 6 | Status Change | InProgress → Done. All 8 tasks completed and verified. | AI_Agent |
+| 2026-02-20 08:29:09 | 15 | Created | PBI created: restructure research pipeline output from monolithic JSON to file-per-lesson directory tree | AI_Agent |
