@@ -24,13 +24,13 @@ const (
 	defaultDatabasePath       = "./data/apollo.db"
 	defaultServerPort         = 8080
 	defaultClaudeCodePath     = "claude"
-	defaultMaxResearchDepth   = 3
-	defaultMaxParallelAgents  = 3
+	defaultMaxResearchDepth   = DefaultMaxResearchDepth
+	defaultMaxParallelAgents  = DefaultMaxParallelAgents
 	defaultTopicSizeLimit     = 8
 	defaultAutoExpandPriority = "essential"
 	defaultCurriculumStale    = 180
 	defaultMasteryThreshold   = 90
-	defaultResearchWorkDir    = "./data/research"
+	defaultResearchWorkDir    = DefaultResearchWorkDir
 	defaultLogLevel           = "info"
 )
 
