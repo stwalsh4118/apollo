@@ -8,14 +8,14 @@ This document lists all tasks associated with PBI 6.
 
 | Task ID | Name | Status | Description |
 | :------ | :--- | :----- | :---------- |
-| 6-1 | [Research Job Models & Constants](./6-1.md) | Proposed | Define Go types for research jobs, CLI responses, progress tracking, and configuration constants |
-| 6-2 | [Research Job Repository](./6-2.md) | Proposed | CRUD operations for research_jobs table (create, get, list, update status/progress, cancel) |
-| 6-3 | [Research API Handlers](./6-3.md) | Proposed | HTTP handlers for POST /api/research, GET /api/research/jobs, GET /api/research/jobs/:id, POST /api/research/jobs/:id/cancel; server wiring; API spec |
-| 6-4 | [Knowledge Pool Summary Builder](./6-4.md) | Proposed | Service to query existing topics/concepts from DB and produce validated knowledge_pool_summary.json |
-| 6-5 | [CLI Session Spawner](./6-5.md) | Proposed | exec.Command wrapper for Claude Code CLI with flag construction, JSON parsing, session ID extraction, and process management |
-| 6-6 | [Curriculum Ingester](./6-6.md) | Proposed | Parse structured JSON output, validate against schema, store full curriculum (topic, modules, lessons, concepts, prerequisites) in SQLite |
-| 6-7 | [Research Pipeline Orchestrator](./6-7.md) | Proposed | Job lifecycle management, context preparation, multi-turn 4-pass pipeline execution, progress tracking, error handling, cancellation |
-| 6-8 | [E2E CoS Test](./6-8.md) | Proposed | End-to-end tests verifying all PBI 6 acceptance criteria with mocked CLI sessions |
+| 6-1 | [Research Job Models & Constants](./6-1.md) | Done | Define Go types for research jobs, CLI responses, progress tracking, and configuration constants |
+| 6-2 | [Research Job Repository](./6-2.md) | Done | CRUD operations for research_jobs table (create, get, list, update status/progress, cancel) |
+| 6-3 | [Research API Handlers](./6-3.md) | Done | HTTP handlers for POST /api/research, GET /api/research/jobs, GET /api/research/jobs/:id, POST /api/research/jobs/:id/cancel; server wiring; API spec |
+| 6-4 | [Knowledge Pool Summary Builder](./6-4.md) | Done | Service to query existing topics/concepts from DB and produce validated knowledge_pool_summary.json |
+| 6-5 | [CLI Session Spawner](./6-5.md) | Done | exec.Command wrapper for Claude Code CLI with flag construction, JSON parsing, session ID extraction, and process management |
+| 6-6 | [Curriculum Ingester](./6-6.md) | Done | Parse structured JSON output, validate against schema, store full curriculum (topic, modules, lessons, concepts, prerequisites) in SQLite |
+| 6-7 | [Research Pipeline Orchestrator](./6-7.md) | Done | Job lifecycle management, context preparation, multi-turn 4-pass pipeline execution, progress tracking, error handling, cancellation |
+| 6-8 | [E2E CoS Test](./6-8.md) | Done | End-to-end tests verifying all PBI 6 acceptance criteria with mocked CLI sessions |
 
 ## Dependency Graph
 

@@ -13,6 +13,8 @@ import (
 	"github.com/sean/apollo/api/internal/config"
 	"github.com/sean/apollo/api/internal/database"
 	"github.com/sean/apollo/api/internal/logging"
+	"github.com/sean/apollo/api/internal/repository"
+	"github.com/sean/apollo/api/internal/research"
 	"github.com/sean/apollo/api/internal/server"
 )
 
@@ -51,6 +53,19 @@ func run() error {
 	}()
 
 	srv := server.New(handle, logger)
+
+	// Create and wire the research orchestrator.
+	researchRepo := repository.NewResearchJobRepository(handle.DB)
+	poolBuilder := research.NewPoolSummaryBuilder(handle.DB)
+	ingester := research.NewCurriculumIngester(handle.DB)
+	cliSession := research.NewCLISession(cfg.ClaudeCodePath)
+
+	orch := research.NewOrchestrator(
+		cliSession, poolBuilder, ingester, researchRepo, logger, cfg,
+	)
+	srv.SetCancelResearchFunc(orch.Cancel)
+
+	go orch.Start(ctx)
 
 	httpServer := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.ServerPort),

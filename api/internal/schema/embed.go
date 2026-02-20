@@ -9,3 +9,9 @@ import "embed"
 //
 //go:embed curriculum.json knowledge_pool_summary.json
 var schemaFS embed.FS
+
+// CurriculumSchemaJSON returns the raw bytes of the embedded curriculum JSON schema.
+// Used by the research orchestrator to write the schema to the job work directory.
+func CurriculumSchemaJSON() ([]byte, error) {
+	return schemaFS.ReadFile(curriculumSchemaFile)
+}

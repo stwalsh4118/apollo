@@ -15,8 +15,9 @@ import (
 
 // Server holds dependencies for the HTTP API.
 type Server struct {
-	db     *database.Handle
-	logger zerolog.Logger
+	db               *database.Handle
+	logger           zerolog.Logger
+	cancelResearchFn handler.CancelFunc
 }
 
 // New creates a Server with the given dependencies.
@@ -25,6 +26,12 @@ func New(db *database.Handle, logger zerolog.Logger) *Server {
 		db:     db,
 		logger: logger,
 	}
+}
+
+// SetCancelResearchFunc sets the function used to cancel running research jobs.
+// Called by the orchestrator during startup.
+func (s *Server) SetCancelResearchFunc(fn handler.CancelFunc) {
+	s.cancelResearchFn = fn
 }
 
 // Router builds and returns the configured chi router with all middleware and routes.
@@ -60,6 +67,12 @@ func (s *Server) Router() chi.Router {
 
 	progressHandler := handler.NewProgressHandler(repository.NewProgressRepository(s.db.DB))
 	progressHandler.RegisterRoutes(r)
+
+	researchHandler := handler.NewResearchHandler(
+		repository.NewResearchJobRepository(s.db.DB),
+		s.cancelResearchFn,
+	)
+	researchHandler.RegisterRoutes(r)
 
 	return r
 }
