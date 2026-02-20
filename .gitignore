@@ -1,2 +1,13 @@
 # Runtime data
 api/data/
+
+# SQLite databases
+api/*.db
+api/*.db-shm
+api/*.db-wal
+
+# Test coverage
+api/cover.out
+
+# Local config
+.navi.yaml
